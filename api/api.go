@@ -12,6 +12,7 @@ package api
  }
  
  type FMP_Investment_Info_From_API_on_Daily struct  {
+	Date Date() unique
 	Fil_Price float32 
 	Current_Sector_Initial_Pledge_32GB float32 
 	Fil_Rewards_f01624021_node_1 float32

@@ -7,6 +7,7 @@ import(
 	"github.com/go-fiber/fiber"
 	"net/http"
 	"github.com/achnir97/go_lang_filbytes/api"
+	"os"
 
 )
 
@@ -99,6 +100,12 @@ func() Update_Node_Adjusted_Power_OnlyOnce_Month(db *gorm.DB, context *fiber.Con
 
 
 func main() {
+	err:= os.loadEnv(".env")
+	if err!=nil {
+		fmt.Printf("Enviromente Varible from the env file cannot be loaded, Check for the error")
+		return err 
+	}
+	
 		c:=cron.New()
 		c.Add("0 0 24 * * ", Update_Node_Adjusted_Power_OnlyOnce_Month()) // implement once every month 
 	    c.Add("0, 0, 0, * * * ",api.GetRewards()) // implement once every 24hrs 
