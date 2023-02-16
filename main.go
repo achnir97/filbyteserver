@@ -1,13 +1,13 @@
 package main
 
 import(
-	"fmt"
-	"time" 
-	"context"
+	_"fmt"
+    _"time" 
+	_"context"
 	"github.com/gofiber/fiber/v2"
-	"net/http"
+	_"net/http"
 	"github.com/achnir97/go_lang_filbytes/api"
-	"os"
+	_"os"
 
 )
 /*
@@ -97,22 +97,39 @@ func() Update_Node_Adjusted_Power_OnlyOnce_Month(db *gorm.DB, context *fiber.Con
 
 
 func main() {
-	err := api.GetRewards_For_Each_Node(context *fiber.Context)
+	app:=fiber.New()
 
-	err:= os.Loadenv(".env")
-	if err!=nil {
-		fmt.Printf("Enviromente Varible from the env file cannot be loaded, Check for the error")
-		return err 
-	}
+	app.Get("/filPrice", api.GetFIL_Price_on_24Hour_basis)
+	app.Get("/filReward_node1", api.GetRewards_For_Each_Node_f01624021)
 	
-		c:=cron.New()
-		c.Add("0 0 24 * * ", Update_Node_Adjusted_Power_OnlyOnce_Month()) // implement once every month 
-	    c.Add("0, 0, 0, * * * ",api.GetRewards()) // implement once every 24hrs 
-		if err!=nil {
-			fmt.Println("Error scheduling task:", err)
-		}
-		c.Start()
-		select{}
+	// defer app.ReleaseCtx(Ctx)
 
+	// api.GetRewards_For_Each_Node(context *fiber.Ctx)
+	// if err!=nil {
+	// 	fmt.Printf("The error occured, try to resolve error ")
+	// }
+	// fmt.Print("Successfuly Fetched Rewards for each Node.")
+	
+
+	// err := api.GetFIL_Price_on_24Hour_basis(&context)
+	// if err!=nil {
+
+	// }
+
+	// err:= (".env")
+	// if err!=nil {
+	// 	fmt.Printf("Enviromente Varible from the env file cannot be loaded, Check for the error")
+	// 	return err 
+	// }
+	
+	// 	c:=cron.New()
+	// 	c.Add("0 0 24 * * ", Update_Node_Adjusted_Power_OnlyOnce_Month()) // implement once every month 
+	//     c.Add("0, 0, 0, * * * ",api.GetRewards()) // implement once every 24hrs 
+	// 	if err!=nil {
+	// 		fmt.Println("Error scheduling task:", err)
+	// 	}
+	// 	c.Start()
+	// 	select{}
+	app.Listen(":4000")
 	
 	}
