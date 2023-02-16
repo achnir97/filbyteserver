@@ -7,7 +7,9 @@ package api
 	"github.com/gofiber/fiber/v2"
 	"io/ioutil"
 	"gorm.io/gorm"
-	_"encoding/json"
+	"encoding/json"
+
+
 )
 
 type MinerDetails struct {
@@ -20,7 +22,7 @@ type MinerDetails struct {
  
  type Fetched_Info struct{
 	Id string `json:"id"`
-	Miner *MinerDetails
+	Miner MinerDetails `json:"miner"`
  }
 /*type FMP_Investment_Info_From_API_on_Daily struct  {
 	Date Date `json:"date" validate:"required"`
@@ -83,16 +85,24 @@ func GetRewards_For_Each_Node_f01624021(context *fiber.Ctx)error{
 		)
 		return err
 	}
-	 //var Fetched_Info *Fetched_Info
+
 	//totalRewards:=Fetched_data.Miner.totalRewards
-	 context.JSON(data)
+	context.JSON(data)
+	var fetched_Info Fetched_Info
 	// if err:= json.Unmarshal(data, &Fetched_Info); err!=nil {
 	// 	fmt.Printf("Error Occured, Try to solve that error\n")
 	// 	return err
 	// }
-	fmt.Println(string(data))
+	if err:=json.NewDecoder(response.Body).Decode(&fetched_Info); err!=nil {
+		fmt.Printf("The error occured and couldnt be decoded to the fetched info")
+		return err
+	}
+	fmt.Printf(fetched_Info.Id)
 	return nil
 }
+
+
+
 
 //Get FIL_Rewards and Quality adjusted power of node f01918123 on daily basis 
 func( r* Repository) GetRewards_For_Each_Node_f01918123(context *fiber.Ctx) {

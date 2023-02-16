@@ -8,6 +8,7 @@ import(
 	_"net/http"
 	"github.com/achnir97/go_lang_filbytes/api"
 	_"os"
+	"github.com/gofiber/fiber/v2/middleware/cors"
 
 )
 /*
@@ -98,7 +99,11 @@ func() Update_Node_Adjusted_Power_OnlyOnce_Month(db *gorm.DB, context *fiber.Con
 
 func main() {
 	app:=fiber.New()
-
+	app.Use(cors.New(cors.Config{
+	AllowOrigins:"*",
+	AllowHeaders:"Origin, Content-Type, Accept",
+	AllowMethods:"GET. POST, PUT, DELETE",
+}))
 	app.Get("/filPrice", api.GetFIL_Price_on_24Hour_basis)
 	app.Get("/filReward_node1", api.GetRewards_For_Each_Node_f01624021)
 	
