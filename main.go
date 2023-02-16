@@ -4,13 +4,13 @@ import(
 	"fmt"
 	"time" 
 	"context"
-	"github.com/go-fiber/fiber"
+	"github.com/gofiber/fiber/v2"
 	"net/http"
 	"github.com/achnir97/go_lang_filbytes/api"
 	"os"
 
 )
-
+/*
 type FMP_Investment_Info_From_API_on_Daily struct  {
 	Date Date()
 	Days  int 
@@ -71,10 +71,7 @@ func Create_FMP_Investment_Static(context *fiber.Context) error {
 
 }
 
-func(FMP_Invest_Dynamic *FMP_Investment_Info_Calculated_Based_ON_API{}) Update(FMP_Invest_Static *FMP_Investment_Info_From_API{}){
-
-
-}
+func(FMP_Invest_Dynamic *FMP_Investment_Info_Calculated_Based_ON_API{}) Update(FMP_Invest_Static *FMP_Investment_Info_From_API{}){}
 
 
 func() Update_Node_Adjusted_Power_OnlyOnce_Month(db *gorm.DB, context *fiber.Context) (error)  {
@@ -96,11 +93,13 @@ func() Update_Node_Adjusted_Power_OnlyOnce_Month(db *gorm.DB, context *fiber.Con
 			}))
            return nil 
 }	
-
+*/
 
 
 func main() {
-	err:= os.loadEnv(".env")
+	err := api.GetRewards_For_Each_Node(context *fiber.Context)
+
+	err:= os.Loadenv(".env")
 	if err!=nil {
 		fmt.Printf("Enviromente Varible from the env file cannot be loaded, Check for the error")
 		return err 
@@ -114,4 +113,6 @@ func main() {
 		}
 		c.Start()
 		select{}
+
+	
 	}

@@ -1,10 +1,10 @@
 package config 
 import (
-	"github.com/zuzho/gorm"
-	"github.com/postgres/postgres"
+	"github.com/gorm.io/gorm"
+	"github.com/gorm.io/postgres"
 	"fmt"
 	"context")
-)
+
 
 type Config struct {
 	User string
