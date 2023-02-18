@@ -99,7 +99,7 @@ type  Node_Related_Info struct{
 
 
 //Get FIL_Rewards and Quality adjusted power of node f01624021 on daily basis 
-func GetRewards_For_Each_Node_f01624021(context *fiber.Ctx)error{ 
+func FIL_Price_n_Block_rewards_for_Each_Node_f01624021(context *fiber.Ctx)error{ 
     var wg sync.WaitGroup
      
     go func() {
@@ -142,7 +142,7 @@ func GetRewards_For_Each_Node_f01624021(context *fiber.Ctx)error{
 	return 
 	}()
 
-// calculate Adjusted power and blocks reward fror f01624021
+// calculate Adjusted power and blocks reward fror f01819003
 	go func() {
 		wg.Add(1)
 		response, err:=http.Get("https://filfox.info/api/v1/address/f01819003")
@@ -164,7 +164,7 @@ func GetRewards_For_Each_Node_f01624021(context *fiber.Ctx)error{
 	return 
 	}()
 
-// calculate Adjusted power and blocks reward fror f01624021
+// calculate Adjusted power and blocks reward fror f01987994
 	go func() {
 		wg.Add(1)
 		response, err:=http.Get("https://filfox.info/api/v1/address/f01987994")
