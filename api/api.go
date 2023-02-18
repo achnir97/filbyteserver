@@ -20,10 +20,6 @@ type MinerDetails struct {
 }
  
 
-func(MinerDetails *MinerDetails)UpdateMinerInfo() error {
-
-}
-
  type Fetched_Info struct{
 	Id string `json:"id"`
 	Miner MinerDetails `json:"miner"`
@@ -95,7 +91,7 @@ type  Node_Related_Info struct{
 
 type FMP_Investment_Integrated_info struct{ 
 	Fil_Price float32 
-	Current_Sector_Initial_Pledge_32GB float32 
+	//Current_Sector_Initial_Pledge_32GB float32 
 	Fil_Rewards_f01624021_node_1 int 
 	Fil_Rewards_f01918123_node_2 int
 	Fil_Rewards_f01987994_node_3 int
@@ -224,7 +220,7 @@ func FIL_Price_n_Block_rewards_for_Each_Node(context *fiber.Ctx)error{
 	wg.Wait()
 	miner.Set_Miner_Info(FIL_PRICE,FIL_REWARDS_f01624021_node_1,FIL_REWARDS_f01819003_node_2,FIL_REWARDS_f01918123_node_3,
 	QualityAdjPower_f01624021_node_1,QualityAdjPower_f01819003_node_2,QualityAdjPower_f01918123_node_3)
+	fmt.Printf("The extracted information are %v\n", &miner)
 	return nil
 }
  
-

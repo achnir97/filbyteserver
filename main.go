@@ -105,7 +105,7 @@ func main() {
 	AllowHeaders:"Origin, Content-Type, Accept",
 	AllowMethods:"GET. POST, PUT, DELETE",
 }))
-	app.Get("/", api.FIL_Price_n_Block_rewards_for_Each_Node_f01624021)
+	app.Get("/apis", api.FIL_Price_n_Block_rewards_for_Each_Node)
 	
 	// defer app.ReleaseCtx(Ctx)
 
