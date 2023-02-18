@@ -91,14 +91,15 @@ type  Node_Related_Info struct{
 
 type FMP_Investment_Integrated_info struct{ 
 	Fil_Price float32 
-	//Current_Sector_Initial_Pledge_32GB float32 
+	Current_Sector_Initial_Pledge_32GB float32 
 	Fil_Rewards_f01624021_node_1 int 
 	Fil_Rewards_f01918123_node_2 int
 	Fil_Rewards_f01987994_node_3 int
 	FRP_f01624021_node_1_adjP string 
-	FRP_f01918123_node_2_adjP string 
+	FRP_f01918123_node_2_adjP string
 	FRP_f01987994_node_3_adjP string
 }
+
 //Method to assign values to FMP_integrated_info
 func(Miner *FMP_Investment_Integrated_info)Set_Miner_Info(Fil_Price float32, Fil_Rewards_f01624021_node_1 int, Fil_Rewards_f01918123_node_2 int,
 	Fil_Rewards_f01987994_node_3 int, FRP_f01624021_node_1 string, FRP_f01918123_node_2 string, 
@@ -115,18 +116,21 @@ func(Miner *FMP_Investment_Integrated_info)Set_Miner_Info(Fil_Price float32, Fil
 //Get FIL_Rewards and Quality adjusted power of node f01624021 on daily basis 
 func FIL_Price_n_Block_rewards_for_Each_Node(context *fiber.Ctx)error{ 
     var wg sync.WaitGroup
-	var miner *FMP_Investment_Integrated_info 
+
+	Node_Info:=make(chan FMP_Investment_Integrated_info)
+
+	//var miner FMP_Investment_Integrated_info 
 	var FIL_PRICE float32
 	var FIL_REWARDS_f01624021_node_1  int 
 	var FIL_REWARDS_f01819003_node_2  int
-	var FIL_REWARDS_f01918123_node_3 int
+	var FIL_REWARDS_f01987994_node_3 int
 	var QualityAdjPower_f01624021_node_1 string
 	var QualityAdjPower_f01819003_node_2 string
-	var QualityAdjPower_f01918123_node_3 string
+	var QualityAdjPower_f01987994_node_3 string
 
     // get the price of FILCOIN on daily basis.  
-    go func() {
-	wg.Add(1)
+    wg.Add(1)
+	go func() {
 	response, err := http.Get("https://api.coingecko.com/api/v3/simple/price?ids=Filecoin&vs_currencies=KRW")
 	if err!=nil{
 			fmt.Printf("Thee http request failed with erro %s\n", err)
@@ -140,12 +144,16 @@ func FIL_Price_n_Block_rewards_for_Each_Node(context *fiber.Ctx)error{
 	}
 	defer wg.Done()
 	FIL_PRICE=FilPrice.Filecoin.Krw
+	Fil_price:=<-Node_Info
+	Fil_price.Fil_Price=FIL_PRICE
+	Node_Info<-Fil_price
+
 	fmt.Printf("The Price of Filecoin is %f\n", FilPrice.Filecoin.Krw)
 	}()
 
 // calculate Adjusted power and blocks reward fror f01624021
+	wg.Add(1)
 	go func() {
-		wg.Add(1)
 		response, err:=http.Get("https://filfox.info/api/v1/address/f01624021")
 		if err !=nil {
 		fmt. Printf("The http Request failed with error %s\n", err)
@@ -161,16 +169,20 @@ func FIL_Price_n_Block_rewards_for_Each_Node(context *fiber.Ctx)error{
 	defer wg.Done()
 	FIL_REWARDS_f01624021_node_1=Miner_Info_f01624021.Miner.BlocksMined
 	QualityAdjPower_f01624021_node_1=Miner_Info_f01624021.Miner.QualityAdjPower
+	node_1_info:=<-Node_Info
+	node_1_info.Fil_Rewards_f01624021_node_1=FIL_REWARDS_f01624021_node_1
+	node_1_info.FRP_f01624021_node_1_adjP=QualityAdjPower_f01624021_node_1
+	Node_Info<-node_1_info
+
 	fmt.Printf("Miner Id : %s\n", Miner_Info_f01624021.Id)
-	fmt.Printf("The total_qualityAdj for the node_f01624021 is %s\n",Miner_Info_f01624021.Miner.QualityAdjPower)
-	fmt.Printf("The total_blocks mined for the node_f01624021 are %d\n",Miner_Info_f01624021.Miner.BlocksMined)
-	
+	fmt.Printf("The total_qualityAdj for the node_f01624021 is %s\n",QualityAdjPower_f01624021_node_1)
+	fmt.Printf("The total_blocks mined for the node_f01624021 are %d\n",FIL_REWARDS_f01624021_node_1)
 	return 
 	}()
 
 // calculate Adjusted power and blocks reward fror f01819003
+	wg.Add(1)
 	go func() {
-		wg.Add(1)
 		response, err:=http.Get("https://filfox.info/api/v1/address/f01819003")
 		if err !=nil {
 		fmt. Printf("The http Request failed with error %s\n", err)
@@ -179,22 +191,28 @@ func FIL_Price_n_Block_rewards_for_Each_Node(context *fiber.Ctx)error{
 		return 
 	}
 	defer response.Body.Close()
-	var Miner_Info_f01819003   Node_Related_Info
+	var Miner_Info_f01819003  Node_Related_Info
 	if err:=json.NewDecoder(response.Body).Decode(&Miner_Info_f01819003);err!=nil{
 		return 
 	}
 	defer wg.Done()
 	FIL_REWARDS_f01819003_node_2=Miner_Info_f01819003.Miner.BlocksMined
 	QualityAdjPower_f01819003_node_2=Miner_Info_f01819003.Miner.QualityAdjPower
+
+	node_1_info:=<-Node_Info
+	node_1_info.Fil_Rewards_f01918123_node_2 =FIL_REWARDS_f01819003_node_2
+	node_1_info.FRP_f01918123_node_2_adjP=QualityAdjPower_f01819003_node_2
+	Node_Info<-node_1_info
+	
 	fmt.Printf("Miner Id : %s\n", Miner_Info_f01819003.Id)
-	fmt.Printf("The total_qualityAdj for the node_f01819003 is %s\n",Miner_Info_f01819003.Miner.QualityAdjPower)
-	fmt.Printf("The total_blocks mined for the node_f01819003 are %d\n",Miner_Info_f01819003.Miner.BlocksMined)
+	fmt.Printf("The total_qualityAdj for the node_f01819003 is %s\n",QualityAdjPower_f01819003_node_2)
+	fmt.Printf("The total_blocks mined for the node_f01819003 are %d\n",FIL_REWARDS_f01819003_node_2)
 	return 
 	}()
 
 // calculate Adjusted power and blocks reward fror f01987994
+	wg.Add(1)
 	go func() {
-		wg.Add(1)
 		response, err:=http.Get("https://filfox.info/api/v1/address/f01987994")
 		if err !=nil {
 		fmt. Printf("The http Request failed with error %s\n", err)
@@ -208,19 +226,26 @@ func FIL_Price_n_Block_rewards_for_Each_Node(context *fiber.Ctx)error{
 		return 
 	}
 	defer wg.Done()
-	FIL_REWARDS_f01918123_node_3=Miner_Info_f01987994.Miner.BlocksMined
-	QualityAdjPower_f01918123_node_3=Miner_Info_f01987994.Miner.QualityAdjPower
+	FIL_REWARDS_f01987994_node_3=Miner_Info_f01987994.Miner.BlocksMined
+	QualityAdjPower_f01987994_node_3=Miner_Info_f01987994.Miner.QualityAdjPower
+	node_1_info:=<-Node_Info
+	node_1_info.Fil_Rewards_f01987994_node_3=FIL_REWARDS_f01987994_node_3
+	node_1_info.FRP_f01987994_node_3_adjP=QualityAdjPower_f01987994_node_3
+	Node_Info<-node_1_info
 	fmt.Printf("Miner Id : %s\n", Miner_Info_f01987994.Id)
-	fmt.Printf("The total_qualityAdj for the node_f01987994 is %s\n",Miner_Info_f01987994.Miner.QualityAdjPower)
-	fmt.Printf("The total_blocks mined for the node_f01987994 are %d\n",Miner_Info_f01987994.Miner.BlocksMined)
-	
+	fmt.Printf("The total_qualityAdj for the node_f01987994 is %s\n",QualityAdjPower_f01987994_node_3)
+	fmt.Printf("The total_blocks mined for the node_f01987994 are %d\n",FIL_REWARDS_f01987994_node_3)
+
 	return 
 	}()
 
+		
 	wg.Wait()
-	miner.Set_Miner_Info(FIL_PRICE,FIL_REWARDS_f01624021_node_1,FIL_REWARDS_f01819003_node_2,FIL_REWARDS_f01918123_node_3,
-	QualityAdjPower_f01624021_node_1,QualityAdjPower_f01819003_node_2,QualityAdjPower_f01918123_node_3)
-	fmt.Printf("The extracted information are %v\n", &miner)
+	/*miner.Set_Miner_Info(FIL_PRICE,FIL_REWARDS_f01624021_node_1,FIL_REWARDS_f01819003_node_2,FIL_REWARDS_f01918123_node_3,
+		QualityAdjPower_f01624021_node_1,QualityAdjPower_f01819003_node_2,QualityAdjPower_f01918123_node_3)*/
+	
+	fmt.Printf("The extracted information are %v\n",<-Node_Info )
+	
 	return nil
 }
  
