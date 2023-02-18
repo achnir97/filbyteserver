@@ -5,11 +5,10 @@ package api
 	"net/http"
 	_"github.com/go-playground/validator/v10"
 	"github.com/gofiber/fiber/v2"
-	"io/ioutil"
-	"gorm.io/gorm"
+	_"io/ioutil"
+	_"gorm.io/gorm"
 	"encoding/json"
-
-
+	"sync"
 )
 
 type MinerDetails struct {
@@ -36,120 +35,160 @@ type MinerDetails struct {
 	FRP_f01987994_node_3 float32 `json:"frp_f01987994_node_3" validate:"required,gte=0"`
 }
 */
-
-type Repository struct{
-	db *gorm.DB 
-}
-
-type Response_from_node_1 struct {
-	
-}
-func GetFIL_Price_on_24Hour_basis(context *fiber.Ctx) error { 
-	response, err:=http.Get("https://api.coingecko.com/api/v3/simple/price?ids=Filecoin&vs_currencies=KRW")
-	if err!=nil {
-		fmt.Printf("The Htpp request failed with errp %s\n", err)
-		context.Status(http.StatusBadRequest).JSON(&fiber.Map{
-			"Message":"Couldnot fetch FIl_Price"})
-			return err
+type Fil_price struct{
+	Filecoin Price `json:"filecoin"`
 	}
-	defer response.Body.Close()
-	data,err:=ioutil.ReadAll(response.Body)
-	if err != nil {
-		fmt.Printf("Failed to read response body with error :%s\n", err)
-		context.SendStatus(http.StatusInternalServerError)
-		return err
+
+type Price struct{
+	Krw float32 `json:"krw"`
 }
- 		context.JSON(data)
-		fmt.Printf("The price of filecoin so obtained is %s\n", string(data))
-		return nil 
+
+type  Node_Related_Info struct{
+	Id string `json:"id"`
+	RobustAddress string `json:"robust"`
+	Actor string `json:"actor"`
+	CreateHeight int `json:"createHeight"`
+	CreateTimestamp int `json:"createTimestamp"`
+	LastSeenHeight int  `json:"lastSeenHeight"`
+	Balance string `json:"balance"`
+	MessageCount int `json:"messageCount"`
+	Timestamp int `json:"timestamp"`
+	Miner struct {
+		Owner struct {
+			Address string `json:"address"`
+			Balance string `json:"balance"`
+		} `json:"owner"`
+		Worker struct {
+			Address string `json:"address"`
+			Balance string `json:"balance"`
+		} `json:"worker"`
+		ControlAddresses[] struct{
+			Address string `json:"address"`
+			Balance string `json:"balance"`
+		} `json:"controlAddresses"`
+		PeerId string `json:"peerId"`
+		MultiAddresses []string `json:"multiAddresses"`
+		SectorSize int64 `json:"sectorSize"`
+		RawBytePower string `json:"rawBytePower"`
+		QualityAdjPower string `json:"qualityAdjPower"`
+		NetworkQualityAdjPower string `json:"networkQualityAdjPower"`
+		BlocksMined int `json:"blocksMined"`
+		WeightedBlocksMined int `json:"weightedBlocksMined"`
+		TotalRewards string `json:"totalRewards"`
+		Sectors struct{
+			Live int `json:"live"`
+			Active int `json:"active"`
+			Faulty int `json:"faulty"`
+			Recovering int `json:"recovering"`
+		} `json:"sectors"`
+		PreCommitDeposits string `json:"PreCommitDeposits"`
+		VestingFunds	string `json:"vestingFunds"`
+		IntialPledgeRequirement string `json:"initialPledgeRequirement"`
+		AvailableBalance string `json:"availableBalance"`
+		SecotorPledgeBalance string `json:"sectorPledgeBalance"`
+		PledgeBalance 	string 	`json:"pledgeBalance"`
+		RawBytePowerRank int `json:"rawBytePowerRank"`
+		QualityAdjPowerRank int `json:"qualityAdjPowerRank"`
+	}  `json:"miner"`
+	
+	OwnerMiners []interface{} `json:"ownedMiners"`
+	WorkerMiner []interface{} `json:"workerMiners"`
+	Address string `json:"address"`
 }
+
+
 
 //Get FIL_Rewards and Quality adjusted power of node f01624021 on daily basis 
 func GetRewards_For_Each_Node_f01624021(context *fiber.Ctx)error{ 
+    var wg sync.WaitGroup
+     
+    go func() {
+	wg.Add(1)
+	response, err := http.Get("https://api.coingecko.com/api/v3/simple/price?ids=Filecoin&vs_currencies=KRW")
+	if err!=nil{
+			fmt.Printf("Thee http request failed with erro %s\n", err)
+			context.Status(http.StatusBadRequest).JSON(&fiber.Map{
+				"Message":"Couldnot fetch FIL_Price"})
+	}
+	defer response.Body.Close()
+	var FilPrice Fil_price
+	if err:=json.NewDecoder(response.Body).Decode(&FilPrice);err!=nil{
+		return 
+	}
+	defer wg.Done()
+	fmt.Printf("The Price of Filecoin is %f\n", FilPrice.Filecoin.Krw)
+	}()
 
-	response, err:=http.Get("https://filfox.info/api/v1/address/f01624021")
-	if err !=nil {
+// calculate Adjusted power and blocks reward fror f01624021
+	go func() {
+		wg.Add(1)
+		response, err:=http.Get("https://filfox.info/api/v1/address/f01624021")
+		if err !=nil {
 		fmt. Printf("The http Request failed with error %s\n", err)
 		context.Status(http.StatusBadRequest).JSON(&fiber.Map{
 			"Message":"Couldnot fetch Total_Rewards_For_Each_Node"})
-		return err
+		return 
 	}
 	defer response.Body.Close()
-	//var Fetched_data Fetched_Info
-	//data:=context.JSON(response.Body)
-	data, err:=ioutil.ReadAll(response.Body)
-	if err !=nil {
-		fmt.Printf("failed to read Response body with error")
-		context.Status(http.StatusBadRequest).JSON(&fiber.Map{
-			"Message":"Could not read information from the Response\n"},
-		)
-		return err
+	var Miner_Info   Node_Related_Info
+	if err:=json.NewDecoder(response.Body).Decode(&Miner_Info);err!=nil{
+		return 
 	}
+	defer wg.Done()
+	fmt.Printf("Miner Id : %s\n", Miner_Info.Id)
+	fmt.Printf("The total_qualityAdj for the node_f01624021 is %s\n",Miner_Info.Miner.QualityAdjPower)
+	fmt.Printf("The total_blocks mined for the node_f01624021 are %d\n",Miner_Info.Miner.BlocksMined)
+	
+	return 
+	}()
 
-	//totalRewards:=Fetched_data.Miner.totalRewards
-	context.JSON(data)
-	var fetched_Info Fetched_Info
-	// if err:= json.Unmarshal(data, &Fetched_Info); err!=nil {
-	// 	fmt.Printf("Error Occured, Try to solve that error\n")
-	// 	return err
-	// }
-	if err:=json.NewDecoder(response.Body).Decode(&fetched_Info); err!=nil {
-		fmt.Printf("The error occured and couldnt be decoded to the fetched info")
-		return err
+// calculate Adjusted power and blocks reward fror f01624021
+	go func() {
+		wg.Add(1)
+		response, err:=http.Get("https://filfox.info/api/v1/address/f01819003")
+		if err !=nil {
+		fmt. Printf("The http Request failed with error %s\n", err)
+		context.Status(http.StatusBadRequest).JSON(&fiber.Map{
+			"Message":"Couldnot fetch Total_Rewards_For_Each_Node"})
+		return 
 	}
-	fmt.Printf(fetched_Info.Id)
+	defer response.Body.Close()
+	var Miner_Info   Node_Related_Info
+	if err:=json.NewDecoder(response.Body).Decode(&Miner_Info);err!=nil{
+		return 
+	}
+	defer wg.Done()
+	fmt.Printf("Miner Id : %s\n", Miner_Info.Id)
+	fmt.Printf("The total_qualityAdj for the node_f01819003 is %s\n",Miner_Info.Miner.QualityAdjPower)
+	fmt.Printf("The total_blocks mined for the node_f01819003 are %d\n",Miner_Info.Miner.BlocksMined)
+	return 
+	}()
+
+// calculate Adjusted power and blocks reward fror f01624021
+	go func() {
+		wg.Add(1)
+		response, err:=http.Get("https://filfox.info/api/v1/address/f01987994")
+		if err !=nil {
+		fmt. Printf("The http Request failed with error %s\n", err)
+		context.Status(http.StatusBadRequest).JSON(&fiber.Map{
+			"Message":"Couldnot fetch Total_Rewards_For_Each_Node"})
+		return 
+	}
+	defer response.Body.Close()
+	var Miner_Info   Node_Related_Info
+	if err:=json.NewDecoder(response.Body).Decode(&Miner_Info);err!=nil{
+		return 
+	}
+	defer wg.Done()
+	fmt.Printf("Miner Id : %s\n", Miner_Info.Id)
+	fmt.Printf("The total_qualityAdj for the node_f01987994 is %s\n",Miner_Info.Miner.QualityAdjPower)
+	fmt.Printf("The total_blocks mined for the node_f01987994 are %d\n",Miner_Info.Miner.BlocksMined)
+	
+	return 
+	}()
+
+	wg.Wait()
 	return nil
 }
-
-
-
-
-//Get FIL_Rewards and Quality adjusted power of node f01918123 on daily basis 
-func( r* Repository) GetRewards_For_Each_Node_f01918123(context *fiber.Ctx) {
-
-	response, err:=http.Get("https://filfox.info/api/v1/address/f01819003")
-	if err !=nil {
-		fmt. Printf("The http Request failed with error %s\n", err)
-		context.Status(http.StatusBadRequest).JSON(&fiber.Map{
-			"Message":"Couldnot fetch Total_Rewards_For_Node_f01918123"})
-	}
-	defer response.Body.Close()
-	data, err:=ioutil.ReadAll(response.Body)
-	if err !=nil {
-		fmt.Printf("failed to read Response body with error")
-		context.Status(http.StatusBadRequest).JSON(&fiber.Map{
-			"Message":"Could not read information from the Response\n"},
-		)
-	}
-	context.JSON(data)
-	fmt.Printf("The Reward for the node_ff01819003 are%d\n",data)
-}
-
-
-//Get FIL_Rewards and Quality adjusted power of node f01987994 on daily basis 
-func(r *Repository) GetRewards_For_Each_Node_f01987994(context *fiber.Ctx) {
-
-	response, err:=http.Get("https://filfox.info/api/v1/address/f01987994")
-	if err !=nil {
-		fmt. Printf("The http Request failed with error %s\n", err)
-		context.Status(http.StatusBadRequest).JSON(&fiber.Map{
-			"Message":"Couldnot fetch Total_Rewards_For_Each_Node"})	
-	}
-	defer response.Body.Close()
-	data, err:=ioutil.ReadAll(response.Body)
-	if err !=nil {
-		fmt.Printf("failed to read Response body with error")
-		context.Status(http.StatusBadRequest).JSON(&fiber.Map{
-			"Message":"Could not read information from the Response\n"},
-		)
-	}
-	context.JSON(data)
-	fmt.Printf("The Reward for the node_ff01819003 are %d\n",data)
-}
-
-// Task  Get the data from the API 
-// Calculate the value from the API and s
-// Store the value so calculated in sql database. 
-// Fetch value from sql database to mysql and render to to the FrontEnd. 
-// Render all the required value in the FrontEnd. 
+ 
 
