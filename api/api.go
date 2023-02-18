@@ -99,7 +99,7 @@ type  Node_Related_Info struct{
 
 
 //Get FIL_Rewards and Quality adjusted power of node f01624021 on daily basis 
-func FIL_Price_n_Block_rewards_for_Each_Node_f01624021(context *fiber.Ctx)error{ 
+func FIL_Price_n_Block_rewards_for_Each_Node(context *fiber.Ctx)error{ 
     var wg sync.WaitGroup
      
     go func() {
