@@ -19,22 +19,17 @@ type MinerDetails struct {
    TotalRewards  string `json:"totalRewards"`
 }
  
+
+func(MinerDetails *MinerDetails)UpdateMinerInfo() error {
+
+}
+
  type Fetched_Info struct{
 	Id string `json:"id"`
 	Miner MinerDetails `json:"miner"`
  }
-/*type FMP_Investment_Info_From_API_on_Daily struct  {
-	Date Date `json:"date" validate:"required"`
-	Fil_Price float32 `json:"fil_price" validate:"required,gte=0"`
-	Current_Sector_Initial_Pledge_32GB float32 `json:"current_sector_initial_pledge_32gb" validate:"required,gte=0"`
-	Fil_Rewards_f01624021_node_1 float32 `json:"fil_rewards_f01624021_node_1" validate:"required,gte=0"`
-	Fil_Rewards_f01918123_node_2 float32 `json:"fil_rewards_f01918123_node_2" validate:"required,gte=0"`	
-	Fil_Rewards_f01987994_node_3 float32 `json:"fil_rewards_f01987994_node_3" validate:"required,gte=0"`
-	FRP_f01624021_node_1 float32 `json:"frp_f01624021_node_1" validate:"required,gte=0"`
-	FRP_f01918123_node_2 float32 `json:"frp_f01918123_node_2" validate:"required,gte=0"`
-	FRP_f01987994_node_3 float32 `json:"frp_f01987994_node_3" validate:"required,gte=0"`
-}
-*/
+
+
 type Fil_price struct{
 	Filecoin Price `json:"filecoin"`
 	}
@@ -98,10 +93,42 @@ type  Node_Related_Info struct{
 
 
 
+type FMP_Investment_Integrated_info struct{ 
+	Fil_Price float32 
+	Current_Sector_Initial_Pledge_32GB float32 
+	Fil_Rewards_f01624021_node_1 int 
+	Fil_Rewards_f01918123_node_2 int
+	Fil_Rewards_f01987994_node_3 int
+	FRP_f01624021_node_1_adjP string 
+	FRP_f01918123_node_2_adjP string 
+	FRP_f01987994_node_3_adjP string
+}
+//Method to assign values to FMP_integrated_info
+func(Miner *FMP_Investment_Integrated_info)Set_Miner_Info(Fil_Price float32, Fil_Rewards_f01624021_node_1 int, Fil_Rewards_f01918123_node_2 int,
+	Fil_Rewards_f01987994_node_3 int, FRP_f01624021_node_1 string, FRP_f01918123_node_2 string, 
+	FRP_f01987994_node_3 string){
+		Miner.Fil_Price=Fil_Price
+		Miner.Fil_Rewards_f01624021_node_1=Fil_Rewards_f01624021_node_1
+		Miner.Fil_Rewards_f01918123_node_2=Fil_Rewards_f01918123_node_2
+		Miner.Fil_Rewards_f01987994_node_3=Fil_Rewards_f01987994_node_3
+		Miner.FRP_f01624021_node_1_adjP=FRP_f01624021_node_1
+		Miner.FRP_f01918123_node_2_adjP=FRP_f01918123_node_2
+		Miner.FRP_f01987994_node_3_adjP=FRP_f01987994_node_3
+}
+
 //Get FIL_Rewards and Quality adjusted power of node f01624021 on daily basis 
 func FIL_Price_n_Block_rewards_for_Each_Node(context *fiber.Ctx)error{ 
     var wg sync.WaitGroup
-     
+	var miner *FMP_Investment_Integrated_info 
+	var FIL_PRICE float32
+	var FIL_REWARDS_f01624021_node_1  int 
+	var FIL_REWARDS_f01819003_node_2  int
+	var FIL_REWARDS_f01918123_node_3 int
+	var QualityAdjPower_f01624021_node_1 string
+	var QualityAdjPower_f01819003_node_2 string
+	var QualityAdjPower_f01918123_node_3 string
+
+    // get the price of FILCOIN on daily basis.  
     go func() {
 	wg.Add(1)
 	response, err := http.Get("https://api.coingecko.com/api/v3/simple/price?ids=Filecoin&vs_currencies=KRW")
@@ -116,6 +143,7 @@ func FIL_Price_n_Block_rewards_for_Each_Node(context *fiber.Ctx)error{
 		return 
 	}
 	defer wg.Done()
+	FIL_PRICE=FilPrice.Filecoin.Krw
 	fmt.Printf("The Price of Filecoin is %f\n", FilPrice.Filecoin.Krw)
 	}()
 
@@ -130,14 +158,16 @@ func FIL_Price_n_Block_rewards_for_Each_Node(context *fiber.Ctx)error{
 		return 
 	}
 	defer response.Body.Close()
-	var Miner_Info   Node_Related_Info
-	if err:=json.NewDecoder(response.Body).Decode(&Miner_Info);err!=nil{
+	var Miner_Info_f01624021   Node_Related_Info
+	if err:=json.NewDecoder(response.Body).Decode(&Miner_Info_f01624021);err!=nil{
 		return 
 	}
 	defer wg.Done()
-	fmt.Printf("Miner Id : %s\n", Miner_Info.Id)
-	fmt.Printf("The total_qualityAdj for the node_f01624021 is %s\n",Miner_Info.Miner.QualityAdjPower)
-	fmt.Printf("The total_blocks mined for the node_f01624021 are %d\n",Miner_Info.Miner.BlocksMined)
+	FIL_REWARDS_f01624021_node_1=Miner_Info_f01624021.Miner.BlocksMined
+	QualityAdjPower_f01624021_node_1=Miner_Info_f01624021.Miner.QualityAdjPower
+	fmt.Printf("Miner Id : %s\n", Miner_Info_f01624021.Id)
+	fmt.Printf("The total_qualityAdj for the node_f01624021 is %s\n",Miner_Info_f01624021.Miner.QualityAdjPower)
+	fmt.Printf("The total_blocks mined for the node_f01624021 are %d\n",Miner_Info_f01624021.Miner.BlocksMined)
 	
 	return 
 	}()
@@ -153,14 +183,16 @@ func FIL_Price_n_Block_rewards_for_Each_Node(context *fiber.Ctx)error{
 		return 
 	}
 	defer response.Body.Close()
-	var Miner_Info   Node_Related_Info
-	if err:=json.NewDecoder(response.Body).Decode(&Miner_Info);err!=nil{
+	var Miner_Info_f01819003   Node_Related_Info
+	if err:=json.NewDecoder(response.Body).Decode(&Miner_Info_f01819003);err!=nil{
 		return 
 	}
 	defer wg.Done()
-	fmt.Printf("Miner Id : %s\n", Miner_Info.Id)
-	fmt.Printf("The total_qualityAdj for the node_f01819003 is %s\n",Miner_Info.Miner.QualityAdjPower)
-	fmt.Printf("The total_blocks mined for the node_f01819003 are %d\n",Miner_Info.Miner.BlocksMined)
+	FIL_REWARDS_f01819003_node_2=Miner_Info_f01819003.Miner.BlocksMined
+	QualityAdjPower_f01819003_node_2=Miner_Info_f01819003.Miner.QualityAdjPower
+	fmt.Printf("Miner Id : %s\n", Miner_Info_f01819003.Id)
+	fmt.Printf("The total_qualityAdj for the node_f01819003 is %s\n",Miner_Info_f01819003.Miner.QualityAdjPower)
+	fmt.Printf("The total_blocks mined for the node_f01819003 are %d\n",Miner_Info_f01819003.Miner.BlocksMined)
 	return 
 	}()
 
@@ -175,19 +207,23 @@ func FIL_Price_n_Block_rewards_for_Each_Node(context *fiber.Ctx)error{
 		return 
 	}
 	defer response.Body.Close()
-	var Miner_Info   Node_Related_Info
-	if err:=json.NewDecoder(response.Body).Decode(&Miner_Info);err!=nil{
+	var Miner_Info_f01987994   Node_Related_Info
+	if err:=json.NewDecoder(response.Body).Decode(&Miner_Info_f01987994);err!=nil{
 		return 
 	}
 	defer wg.Done()
-	fmt.Printf("Miner Id : %s\n", Miner_Info.Id)
-	fmt.Printf("The total_qualityAdj for the node_f01987994 is %s\n",Miner_Info.Miner.QualityAdjPower)
-	fmt.Printf("The total_blocks mined for the node_f01987994 are %d\n",Miner_Info.Miner.BlocksMined)
+	FIL_REWARDS_f01918123_node_3=Miner_Info_f01987994.Miner.BlocksMined
+	QualityAdjPower_f01918123_node_3=Miner_Info_f01987994.Miner.QualityAdjPower
+	fmt.Printf("Miner Id : %s\n", Miner_Info_f01987994.Id)
+	fmt.Printf("The total_qualityAdj for the node_f01987994 is %s\n",Miner_Info_f01987994.Miner.QualityAdjPower)
+	fmt.Printf("The total_blocks mined for the node_f01987994 are %d\n",Miner_Info_f01987994.Miner.BlocksMined)
 	
 	return 
 	}()
 
 	wg.Wait()
+	miner.Set_Miner_Info(FIL_PRICE,FIL_REWARDS_f01624021_node_1,FIL_REWARDS_f01819003_node_2,FIL_REWARDS_f01918123_node_3,
+	QualityAdjPower_f01624021_node_1,QualityAdjPower_f01819003_node_2,QualityAdjPower_f01918123_node_3)
 	return nil
 }
  
