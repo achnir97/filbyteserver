@@ -5,6 +5,7 @@ import FourColumns from './Vogo_1';
 import TwoColumns from './Vogo_2';
 import Frpinv from './Vogo_3';
 import Vogo_4 from './Vogo_4';
+import Tabs from './Browser';
 function App() {
 
   return (
