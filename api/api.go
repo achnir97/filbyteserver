@@ -1,7 +1,7 @@
 package api 
  import (
 	"fmt"
-	_"time"
+	"time"
 	"net/http"
 	_"github.com/go-playground/validator/v10"
 	"github.com/gofiber/fiber/v2"
@@ -23,7 +23,7 @@ type MinerDetails struct {
    TotalRewards  string `json:"totalRewards"`
 }
  
-c:=cron.New() 
+
 var  Total_Quality_adjP_on_daily_basis_for_Vogo int
 var  Total_Quality_adjP_on_daily_basis_for_Inv  int
 
@@ -268,9 +268,9 @@ func FIL_Price_n_Block_rewards_for_Each_Node(context *fiber.Ctx)error{
 type FMP_Info_for_investor struct {
 	gorm.Model 
 	ID uint   `gorm:"primaryKey"`
-	Total_Quality_adjP_For_Vogo int  `json:"total_Quality_adjP_For_Vogo"`
-    Total_Fil_rewards_For_Vogo int 		`json:"total_Fil_rewards_For_vogo"`
-    Total_Quality_adjP_For_Inv int  `json:"total_Quality_adjP_For_Inv"`
+	Total_Quality_adjP_For_Vogo_Daily_Basis int  `json:"total_Quality_adjP_For_Vogo_Daily_Basis"`
+    Total_FIL_Reward_Vogo_daily_Basis  int 		`json:"total_FIL_Reward_Vogo_daily_Basis"`
+    Total_Quality_adjP_For_Inv_daily_Basis int  `json:"total_Quality_adjP_For_Inv_daily_Basis"`
 	Total_Quality_adjP_with_increased_FRP_inv int  `json:"total_Quality_adjP_With_increased_FRP_Inv"`
 	Fil_Rewards_on_daily_basis     int   `json:"fil_Rewards_on_daily_basis"`
 	Total_Fil_rewards_for_Inv int		`json:"total_Fil_rewards_for_Inv`
@@ -291,29 +291,57 @@ func FMP_investment_Calculate(Node_info *FMP_Investment_Integrated_info) *FMP_In
      
 	Total_Quality_adjP_on_daily_basis:=0 
 	now:=time.Now()
-
-	if now.Day()==25 && now.Hour()==0 && time.Now.Minute()==0{
+	FMP_Info := &FMP_Info_for_investor{}
+	
+	if now.Day()==25 && now.Hour()==0 && now.Minute()==0{
+	    
+		var Total_Quality_adjP_For_Inv_daily_Basis int 
+		
 		total_Quality_adjP_For_Vogo := Node_info.FRP_f01624021_node_1_adjP + Node_info.FRP_f01918123_node_2_adjP + Node_info.FRP_f01987994_node_3_adjP
+		
 		Total_Quality_adjP_on_daily_basis_for_Vogo=total_Quality_adjP_For_Vogo
-	}else {
+		
+		FMP_Info.Total_Quality_adjP_For_Vogo_Daily_Basis=total_Quality_adjP_For_Vogo
+		
+		query := "SELECT Total_Quality_adjP_with_increased_FRP_inv  FROM table_name ORDER BY id DESC LIMIT 1"
+		
+		err:=db.Raw(query).Scan(&Total_Quality_adjP_For_Inv_daily_Basis).Error
+		
+		if err!=nil {
+			fmt.Printf("You cannot query Total_Quality_AdjP_with_increassed_FRP_Inv")}
 
+		FMP_Info.Total_Quality_adjP_For_Inv_daily_Basis=Total_Quality_adjP_For_Inv_daily_Basis
+	
+	} else {
+		var Total_Quality_adjP_For_Vogo_Daily_Basis int
+		
+		query := "SELECT Total_Quality_adjP_For_Vogo_Daily_Basis FROM table_name ORDER BY id DESC LIMIT 1"
+		
+		err:=db.Raw(query).Scan(&Total_Quality_adjP_For_Vogo_Daily_Basis).Error
+		
+		if err!=nil {
+		
+			fmt.Printf("Your database cannot be queries")
+		}
+		FMP_Info.Total_Quality_adjP_For_Vogo_Daily_Basis=Total_Quality_adjP_For_Vogo_Daily_Basis
+		
 	}
 		
 
-	 //total_Quality_adjP_For_Vogo := Node_info.FRP_f01624021_node_1_adjP + Node_info.FRP_f01918123_node_2_adjP + Node_info.FRP_f01987994_node_3_adjP
- 
-	Total_FIL_Reward_Vogo := Node_info.Fil_Rewards_f01624021_node_1 + Node_info.Fil_Rewards_f01918123_node_2 + Node_info.Fil_Rewards_f01987994_node_3
-
-	FMP_Info := &FMP_Info_for_investor{}
-	FMP_Info.Total_Quality_adjP_For_Vogo = Total_Quality_adjP_on_daily_basis_for_Vogo
+	
+	Total_FIL_Reward_Vogo_daily_Basis := Node_info.Fil_Rewards_f01624021_node_1 + Node_info.Fil_Rewards_f01918123_node_2 + Node_info.Fil_Rewards_f01987994_node_3
+	
 	FMP_Info.Total_Fil_rewards_For_Vogo = Total_FIL_Reward_Vogo
 
 	total_Quality_adjP_For_Inv := 500.0
 
 	if Total_FIL_Reward_Vogo == 0 {
+	
 		FMP_Info.Fil_Rewards_on_daily_basis = 0
-	} else {
-		FMP_Info.Fil_Rewards_on_daily_basis = (total_Quality_adjP_For_Inv / total_Quality_adjP_For_Vogo) * Total_FIL_Reward_Vogo
+	
+		} else {
+	
+			FMP_Info.Fil_Rewards_on_daily_basis = (total_Quality_adjP_For_Inv /total_Quality_adjP_For_Vogo) * Total_FIL_Reward_Vogo
 	}
 
 	Staking_on_daily_basis := FMP_Info.Fil_Rewards_on_daily_basis
@@ -323,14 +351,21 @@ func FMP_investment_Calculate(Node_info *FMP_Investment_Integrated_info) *FMP_In
 	Sector_initial_pledge := Node_info.Initial_Collateral_Sector_pledge
 
 	if Staking_on_daily_basis == 0 {
+	
 		FMP_Info.Increased_FRP = 0
-	} else {
-		FMP_Info.Increased_FRP_on_daily_basis = Staking_on_daily_basis / (Sector_initial_pledge * 32)
+	
+		} else {
+	
+			FMP_Info.Increased_FRP_on_daily_basis = Staking_on_daily_basis / (Sector_initial_pledge * 32)
 	}
 	var (
+	
 		prevTotalFILRewards int64
+	
 		prevTotalFRP int64
+	
 		prevTotalStaking int64
+	
 		prevTotal_Quality_AdjPow int64 
 	)
 	
