@@ -275,8 +275,8 @@ type FMP_Info_for_investor struct {
 	Fil_Rewards_on_daily_basis     int   `json:"fil_Rewards_on_daily_basis"`
 	Total_Fil_rewards_for_Inv int		`json:"total_Fil_rewards_for_Inv`
 	Total_FIL_Rewards int `json:"total_FIL_Rewards`
-	Staking_on_daily_basis int  `json:"staking"`
-	Total_Staking  int `json:"total_Stakaing"`
+	Staking_on_daily_basis int  `json:"staking_on_daily_basis"`
+	Total_Staking  int `json:"total_Staking"`
 	Total_Reward_value  int  `json:'total_Reward_value`
 	Increased_FRP_on_daily_basis float32 `json:"increase_FRP"`
 	Total_FRP float32  `json:"total_FRP"`
@@ -296,7 +296,7 @@ func FMP_investment_Calculate(Node_info *FMP_Investment_Integrated_info) *FMP_In
 		total_Quality_adjP_For_Vogo := Node_info.FRP_f01624021_node_1_adjP + Node_info.FRP_f01918123_node_2_adjP + Node_info.FRP_f01987994_node_3_adjP
 		Total_Quality_adjP_on_daily_basis_for_Vogo=total_Quality_adjP_For_Vogo
 	}else {
-		
+
 	}
 		
 
@@ -354,4 +354,4 @@ func FMP_investment_Calculate(Node_info *FMP_Investment_Integrated_info) *FMP_In
 	db.Create(&FMP_Info)
 }
 
-if now:=time.Now() 
+
