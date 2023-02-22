@@ -1,7 +1,8 @@
 package config 
 import (
-	"github.com/gorm.io/gorm"
-	"github.com/gorm.io/postgres"
+	"gorm.io/driver/postgres"
+	"gorm.io/gorm"
+	
 	"fmt"
 	"context")
 
