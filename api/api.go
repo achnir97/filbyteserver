@@ -9,10 +9,13 @@ package api
 	_"gorm.io/gorm"
 	"encoding/json"
 	"sync"
-	"strconv"
-	"gorm.io/driver/postgres"
+	_"gorm.io/driver/postgres"
 	"gorm.io/gorm"
-	"github.com/robfig/cron"
+	_"github.com/robfig/cron"
+	"github.com/achnir97/go_lang_filbytes/config"
+	"github.com/joho/godotenv"
+	"strconv"
+	"os"
 )
 
 type MinerDetails struct {
@@ -23,6 +26,7 @@ type MinerDetails struct {
    TotalRewards  string `json:"totalRewards"`
 }
  
+var db *gorm.DB
 
 var  Total_Quality_adjP_on_daily_basis_for_Vogo int
 var  Total_Quality_adjP_on_daily_basis_for_Inv  int
@@ -180,14 +184,14 @@ func FIL_Price_n_Block_rewards_for_Each_Node(context *fiber.Ctx)error{
 	if err !=nil {
 		fmt.Printf("Quality adjusted power_cannot be converted into int")
 	}
-	QualityAdjPower_f01624021_node_1=QualityAdjPower_f01624021_node_1
+	//QualityAdjPower_f01624021_node_1=QualityAdjPower_f01624021_node_1
 	Node_info:=<-c
 	Node_info.Fil_Rewards_f01624021_node_1=FIL_REWARDS_f01624021_node_1
 	Node_info.FRP_f01624021_node_1_adjP =QualityAdjPower_f01624021_node_1
     c<-Node_info
 
 	fmt.Printf("Miner Id : %s\n", Miner_Info_f01624021.Id)
-	fmt.Printf("The total_qualityAdj for the node_f01624021 is %s\n",QualityAdjPower_f01624021_node_1)
+	fmt.Printf("The total_qualityAdj for the node_f01624021 is %d\n",QualityAdjPower_f01624021_node_1)
 	fmt.Printf("The total_blocks mined for the node_f01624021 are %d\n",FIL_REWARDS_f01624021_node_1)
 	return 
 	}()
@@ -220,8 +224,8 @@ func FIL_Price_n_Block_rewards_for_Each_Node(context *fiber.Ctx)error{
 	c<-Node_info
 	
 	fmt.Printf("Miner Id : %s\n", Miner_Info_f01918123.Id)
-	fmt.Printf("The total_qualityAdj for the node_f01819003 is %s\n",QualityAdjPower_f01918123_node_2)
-	fmt.Printf("The total_blocks mined for the node_f01819003 are %d\n",FIL_REWARDS_f01918123_node_2)
+	fmt.Printf("The total_qualityAdj for the node_f01918123 is %d\n",QualityAdjPower_f01918123_node_2)
+	fmt.Printf("The total_blocks mined for the node__f01918123 are %d\n",FIL_REWARDS_f01918123_node_2)
 	return 
 	}()
 
@@ -249,18 +253,17 @@ func FIL_Price_n_Block_rewards_for_Each_Node(context *fiber.Ctx)error{
 	Node_info:= <-c
 	Node_info.Fil_Rewards_f01987994_node_3=FIL_REWARDS_f01987994_node_3
 	Node_info.FRP_f01987994_node_3_adjP=QualityAdjPower_f01987994_node_3
-   c<-Node_info
+    c<-Node_info
 	fmt.Printf("Miner Id : %s\n", Miner_Info_f01987994.Id)
-	fmt.Printf("The total_qualityAdj for the node_f01987994 is %s\n",QualityAdjPower_f01987994_node_3)
+	fmt.Printf("The total_qualityAdj for the node_f01987994 is %d\n",QualityAdjPower_f01987994_node_3)
 	fmt.Printf("The total_blocks mined for the node_f01987994 are %d\n",FIL_REWARDS_f01987994_node_3)
-
 	return 
 	}()
-
-		
 	wg.Wait()
 	Node_info:=<-c
-	fmt.Printf("The node infos are %v\n", Node_info )	
+	fmt.Printf("The node infos are %v\n", Node_info )
+    //db:=dbConnect()
+	//FMP_investment_Calculate(&Node_info, db)
 	return nil
 }
 
@@ -273,11 +276,11 @@ type FMP_Info_for_investor struct {
     Total_Quality_adjP_For_Inv_daily_Basis int  `json:"total_Quality_adjP_For_Inv_daily_Basis"`
 	Total_Quality_adjP_with_increased_FRP_inv int  `json:"total_Quality_adjP_With_increased_FRP_Inv"`
 	Fil_Rewards_on_daily_basis     int   `json:"fil_Rewards_on_daily_basis"`
-	Total_Fil_rewards_for_Inv int		`json:"total_Fil_rewards_for_Inv`
-	Total_FIL_Rewards int `json:"total_FIL_Rewards`
+	Total_Fil_rewards_for_Inv int		`json:"total_Fil_rewards_for_Inv"`
+	Total_FIL_Rewards int `json:"total_FIL_Rewards"`
 	Staking_on_daily_basis int  `json:"staking_on_daily_basis"`
 	Total_Staking  int `json:"total_Staking"`
-	Total_Reward_value  int  `json:'total_Reward_value`
+	Total_Reward_value  int  `json:"total_Reward_value"`
 	Increased_FRP_on_daily_basis float32 `json:"increase_FRP"`
 	Total_FRP float32  `json:"total_FRP"`
 	Paid_Reward_to_Investor int `json:"paid_Reward_to_Investor"`
@@ -287,17 +290,27 @@ type FMP_Info_for_investor struct {
 }
 
 
-func FMP_investment_Calculate(Node_info *FMP_Investment_Integrated_info) *FMP_Info_for_investor {
-     
-	Total_Quality_adjP_on_daily_basis:=0 
-	now:=time.Now()
-	FMP_Info := &FMP_Info_for_investor{}
+func FMP_investment_Calculate(Node_info *FMP_Investment_Integrated_info, db *gorm.DB) *FMP_Info_for_investor {
+    
+	// calculated on the day of investement  i.e will remain consant from the day of investment till the 25th of the next month and on 25th at 12.00 am it wil be updated. 
+	// i.e it is  updated only once a month. 
+	//Total_Quality_adjP_on_daily_basis:=0 
 	
+	//calculate the time 
+	now:=time.Now()
+	//initiliaze the instance of struct for FMP_INFO which is the main struct where all the data will be stored. 
+	FMP_Info := &FMP_Info_for_investor{}
+
+	// Checks if the date is 25th of the month and time is 0.00 am 
 	if now.Day()==25 && now.Hour()==0 && now.Minute()==0{
-	    
-		var Total_Quality_adjP_For_Inv_daily_Basis int 
 		
-		total_Quality_adjP_For_Vogo := Node_info.FRP_f01624021_node_1_adjP + Node_info.FRP_f01918123_node_2_adjP + Node_info.FRP_f01987994_node_3_adjP
+		// if true; there are 2 information that will be updated only once a month on every 25th at 00.00 am 
+		// i.e Total_quality_adjusted_power_for_VOGO
+		// i.e Total_Quality_adjusted_power_for_inv
+		
+		var Total_Quality_adjP_For_Inv_daily_Basis int 
+		// Since Node_info is updated once everyday at  
+		total_Quality_adjP_For_Vogo:=Node_info.FRP_f01624021_node_1_adjP + Node_info.FRP_f01918123_node_2_adjP + Node_info.FRP_f01987994_node_3_adjP
 		
 		Total_Quality_adjP_on_daily_basis_for_Vogo=total_Quality_adjP_For_Vogo
 		
@@ -308,10 +321,10 @@ func FMP_investment_Calculate(Node_info *FMP_Investment_Integrated_info) *FMP_In
 		err:=db.Raw(query).Scan(&Total_Quality_adjP_For_Inv_daily_Basis).Error
 		
 		if err!=nil {
+		
 			fmt.Printf("You cannot query Total_Quality_AdjP_with_increassed_FRP_Inv")}
-
-		FMP_Info.Total_Quality_adjP_For_Inv_daily_Basis=Total_Quality_adjP_For_Inv_daily_Basis
-	
+		
+			FMP_Info.Total_Quality_adjP_For_Inv_daily_Basis=Total_Quality_adjP_For_Inv_daily_Basis
 	} else {
 		var Total_Quality_adjP_For_Vogo_Daily_Basis int
 		
@@ -323,70 +336,97 @@ func FMP_investment_Calculate(Node_info *FMP_Investment_Integrated_info) *FMP_In
 		
 			fmt.Printf("Your database cannot be queries")
 		}
-		FMP_Info.Total_Quality_adjP_For_Vogo_Daily_Basis=Total_Quality_adjP_For_Vogo_Daily_Basis
 		
+		FMP_Info.Total_Quality_adjP_For_Vogo_Daily_Basis=Total_Quality_adjP_For_Vogo_Daily_Basis
 	}
 		
-
-	
 	Total_FIL_Reward_Vogo_daily_Basis := Node_info.Fil_Rewards_f01624021_node_1 + Node_info.Fil_Rewards_f01918123_node_2 + Node_info.Fil_Rewards_f01987994_node_3
 	
-	FMP_Info.Total_Fil_rewards_For_Vogo = Total_FIL_Reward_Vogo
+	FMP_Info.Total_FIL_Reward_Vogo_daily_Basis= Total_FIL_Reward_Vogo_daily_Basis
 
-	total_Quality_adjP_For_Inv := 500.0
+	total_Quality_adjP_For_Inv := 500
 
-	if Total_FIL_Reward_Vogo == 0 {
+	if Total_FIL_Reward_Vogo_daily_Basis == 0 {
 	
 		FMP_Info.Fil_Rewards_on_daily_basis = 0
 	
 		} else {
 	
-			FMP_Info.Fil_Rewards_on_daily_basis = (total_Quality_adjP_For_Inv /total_Quality_adjP_For_Vogo) * Total_FIL_Reward_Vogo
+			FMP_Info.Fil_Rewards_on_daily_basis = (total_Quality_adjP_For_Inv /Total_FIL_Reward_Vogo_daily_Basis ) * Total_FIL_Reward_Vogo_daily_Basis
 	}
 
 	Staking_on_daily_basis := FMP_Info.Fil_Rewards_on_daily_basis
 
 	FMP_Info.Staking_on_daily_basis = Staking_on_daily_basis
 
-	Sector_initial_pledge := Node_info.Initial_Collateral_Sector_pledge
-
+	Sector_initial_pledge := Node_info.Current_Sector_Initial_Pledge_32GB
 	if Staking_on_daily_basis == 0 {
 	
-		FMP_Info.Increased_FRP = 0
+		FMP_Info.Increased_FRP_on_daily_basis = 0
 	
 		} else {
 	
-			FMP_Info.Increased_FRP_on_daily_basis = Staking_on_daily_basis / (Sector_initial_pledge * 32)
+			FMP_Info.Increased_FRP_on_daily_basis = float32(Staking_on_daily_basis) /  float32(Sector_initial_pledge * 32)
 	}
-	var (
-	
-		prevTotalFILRewards int64
-	
-		prevTotalFRP int64
-	
-		prevTotalStaking int64
-	
-		prevTotal_Quality_AdjPow int64 
-	)
 	
 	query := "SELECT Total_FIL_Reward, Total_FRP, Total_Staking,Total_Quality_adjP_with_increased_FRP_inv  FROM table_name ORDER BY id DESC LIMIT 1"
 	
-	err := db.Raw(query).Scan(&prevTotalFILRewards, &prevTotalFRP, &prevTotalStaking, &prevTotal_Quality_AdjPow).Error
+	type PrevInfo struct {
+		prevTotalFILRewards int
+		prevTotalFRP float32
+		PrevTotalStaking int
+		prevTotal_Quality_AdjPow int
+	}
+	var prevInfo PrevInfo
+	err := db.Raw(query).Scan(&prevInfo).Error
 	
 	if err != nil {	
 		fmt.Printf("The database cannot be fetched from the database ")
 	}
 
     
-	FMP_Info.Total_Staking=prevTotalFRP+FMP_Info.Staking_on_daily_basis
+	FMP_Info.Total_Staking=prevInfo.PrevTotalStaking+FMP_Info.Staking_on_daily_basis
 	
-	FMP_Info.Total_FIL_Reward=prevTotalFILRewards+FMP_Info.Fil_Rewards_on_daily_basis
+	FMP_Info.Total_FIL_Rewards=prevInfo.prevTotalFILRewards+FMP_Info.Fil_Rewards_on_daily_basis
 	
-	FMP_Info.Total_FRP=prevTotalFRP+FMP.Info.Increased_FRP_on_daily_basis
+	FMP_Info.Total_FRP=prevInfo.prevTotalFRP+FMP_Info.Increased_FRP_on_daily_basis
     
-	FMP_Info.Total_Quality_adjP_with_increased_FRP_inv=prevTotal_Quality_AdjPow+FMP.Info.Increased_FRP_on_daily_basis
+	FMP_Info.Total_Quality_adjP_with_increased_FRP_inv= int(FMP_Info.Increased_FRP_on_daily_basis+float32(prevInfo.prevTotal_Quality_AdjPow))
 	
 	db.Create(&FMP_Info)
+	return FMP_Info
 }
 
 
+func dbConnect() *gorm.DB {
+	err:=godotenv.Load(".env")
+   if err!=nil{
+	fmt.Printf("")
+   }
+    dbUser:=os.Getenv("USERNAME")
+	dbPassword:=os.Getenv("PASSWORD")
+	dbIP:=os.Getenv("DBIP")
+	strPort :=os.Getenv("DBPORT")
+	dbPort, err:= strconv.Atoi(strPort)
+	if err!= nil {
+        fmt.Printf("the strPort couldnot converted to int")
+	}
+
+	dbName:=os.Getenv("DBNAME")
+	dbSslMode:=os.Getenv("DBSSLMODE")
+	
+	dbConfig:= config.Config {
+       User:dbUser,
+	   Password:dbPassword,
+	   Host:dbIP,
+	   Port:dbPort,
+	   DbName:dbName,
+	   SslMode:dbSslMode,
+	}
+    db, err:=config.Connect(&dbConfig)
+    if err != nil{
+		fmt.Printf("There is error in connecting to data\n")
+	}
+	
+	return db
+}

@@ -7,9 +7,11 @@ import(
 	"github.com/gofiber/fiber/v2"
 	_"net/http"
 	"github.com/achnir97/go_lang_filbytes/api"
-	_"os"
-	"github.com/gofiber/fiber/v2/middleware/cors"
 
+	"github.com/gofiber/fiber/v2/middleware/cors"
+	_"github.com/achnir97/go_lang_filbytes/config"
+	_"github.com/joho/godotenv"
+	
 )
 
 func main() {
