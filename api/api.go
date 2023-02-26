@@ -398,7 +398,7 @@ func FMP_investment_Calculate(Node_info *FMP_Investment_Integrated_info, db *gor
 }
 
 
-func dbConnect() *gorm.DB {
+func DbConnect() *gorm.DB {
 	err:=godotenv.Load(".env")
    if err!=nil{
 	fmt.Printf("")
@@ -406,12 +406,7 @@ func dbConnect() *gorm.DB {
     dbUser:=os.Getenv("USERNAME")
 	dbPassword:=os.Getenv("PASSWORD")
 	dbIP:=os.Getenv("DBIP")
-	strPort :=os.Getenv("DBPORT")
-	dbPort, err:= strconv.Atoi(strPort)
-	if err!= nil {
-        fmt.Printf("the strPort couldnot converted to int")
-	}
-
+    dbPort :=os.Getenv("DBPORT")
 	dbName:=os.Getenv("DBNAME")
 	dbSslMode:=os.Getenv("DBSSLMODE")
 	

@@ -1,0 +1,23 @@
+version: "3.9"
+
+services:
+  postgres:
+    images: postgres
+    restart: always
+    ports:
+      - "5432:5432"
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: vogo1005
+  
+  go:
+    build:
+    ports:
+      - "4000:4000"
+    depends_on:
+      -postgres
+    
+    //volumes: 
+        - ./appdata:/app/data
+    
+    
