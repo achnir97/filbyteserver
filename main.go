@@ -1,7 +1,7 @@
 package main
 
 import(
-	"fmt"
+	_"fmt"
     _"time" 
 	_"context"
 	"github.com/gofiber/fiber/v2"
@@ -20,21 +20,21 @@ func main() {
 	AllowMethods:"GET. POST, PUT, DELETE",
 }))
 
-    db:=api.DbConnect()
+   // db:=api.DbConnect()
 	
-	if !db.Migrator().HasTable(&api.FMP_Info_for_investor{}) {
-		if err := db.AutoMigrate(&api.FMP_Info_for_investor{});err!=nil {
+	/*if !db.Migrator().HasTable(&api.Node_Info_Daily_and_FIl_Price{} ) {
+		if err := db.AutoMigrate(&api.Node_Info_Daily_and_FIl_Price{});err!=nil {
 			panic ("Failed to create table!")
 		}
 		fmt.Println("Table created!")
 	} else {
 		fmt.Println("Table already exists")
 	}
-	//db.Create(&api.FMP_Info_for_investor{})
-	
-	db.Find(&api.FMP_Info_for_investor{},"id=?",1)
+	//db.Create(&api.Node_Info_Daily_and_FIl_Price{})
+	//db.Create( &api.FMP_Investment_Integrated_info)
 
-	//app.Get("/apis", api.FIL_Price_n_Block_rewards_for_Each_Node)
+	//db.Find(&api.FMP_Info_for_investor{},"id=?",1)*/
+	app.Get("/apis", api.FIL_Price_n_Block_rewards_for_Each_Node)
 	app.Listen(":4000")
 }
 

@@ -17,6 +17,8 @@ package api
 	"strconv"
 	"os"
 )
+const ATTOFILL=1e-18 
+const BYTES=1e-12
 
 type MinerDetails struct {
    QualityAdjPower  string `json:"qualityAdjPower"`
@@ -94,19 +96,24 @@ type  Node_Related_Info struct{
 	}  `json:"miner"`
 	
 	OwnerMiners []interface{} `json:"ownedMiners"`
+
 	WorkerMiner []interface{} `json:"workerMiners"`
 	Address string `json:"address"`
 }
 
 
 
-type FMP_Investment_Integrated_info struct{ 
-    gorm.Model 
+type Node_Info_Daily_and_FIl_Price struct{ 
+	gorm.Model
+	Date time.Time  `gorm:"unique;<-:autoCreateTime"`
 	Fil_Price float32 
     Current_Sector_Initial_Pledge_32GB float32 
 	Fil_Rewards_f01624021_node_1 int 
 	Fil_Rewards_f01918123_node_2 int
 	Fil_Rewards_f01987994_node_3 int
+	Cummulative_Fil_Rewards_f01624021_node_1 int 
+	Cummulative_Fil_Rewards_f01918123_node_2 int
+	Cummulative_Fil_Rewards_f01987994_node_3 int
 	FRP_f01624021_node_1_adjP int
 	FRP_f01918123_node_2_adjP int
 	FRP_f01987994_node_3_adjP int
@@ -114,7 +121,7 @@ type FMP_Investment_Integrated_info struct{
 
 
 //Method to assign values to FMP_integrated_info
-func(Miner *FMP_Investment_Integrated_info)Set_Miner_Info(Fil_Price float32, Fil_Rewards_f01624021_node_1 int, Fil_Rewards_f01918123_node_2 int,
+func(Miner *Node_Info_Daily_and_FIl_Price)Set_Miner_Info(Fil_Price float32, Fil_Rewards_f01624021_node_1 int, Fil_Rewards_f01918123_node_2 int,
 	Fil_Rewards_f01987994_node_3 int, FRP_f01624021_node_1 int, FRP_f01918123_node_2 int, 
 	FRP_f01987994_node_3 int){
 		Miner.Fil_Price=Fil_Price
@@ -129,10 +136,10 @@ func(Miner *FMP_Investment_Integrated_info)Set_Miner_Info(Fil_Price float32, Fil
 //Get FIL_Rewards and Quality adjusted power of node f01624021 on daily basis 
 func FIL_Price_n_Block_rewards_for_Each_Node(context *fiber.Ctx)error{ 
     var wg sync.WaitGroup
+    db:=DbConnect()
+	c:=make(chan Node_Info_Daily_and_FIl_Price,1)
 
-	 c:=make(chan FMP_Investment_Integrated_info,1)
-
-	//var miner FMP_Investment_Integrated_info 
+	//var miner Node_Info_Daily_and_FIl_Price 
 	var FIL_PRICE float32
 	var FIL_REWARDS_f01624021_node_1  int 
 	var FIL_REWARDS_f01918123_node_2  int
@@ -157,7 +164,7 @@ func FIL_Price_n_Block_rewards_for_Each_Node(context *fiber.Ctx)error{
 	}
 	defer wg.Done()
 	FIL_PRICE=FilPrice.Filecoin.Krw
-	c<-FMP_Investment_Integrated_info{Fil_Price:FIL_PRICE}
+	c<-Node_Info_Daily_and_FIl_Price{Fil_Price:FIL_PRICE}
 	
 
 	fmt.Printf("The Price of Filecoin is %f\n", FIL_PRICE)
@@ -179,16 +186,44 @@ func FIL_Price_n_Block_rewards_for_Each_Node(context *fiber.Ctx)error{
 		return 
 	}
 	defer wg.Done()
-	FIL_REWARDS_f01624021_node_1=Miner_Info_f01624021.Miner.BlocksMined
+	var Cummulative_Fil_Rewards_f01624021_node_1 int 
+	
+	query:="SELECT Cumulative_Fil_Rewards_f01624021_node_1 FROM node_info_daily_and_f_il_prices ORDER BY id DESC LIMIT 1"
+	
+	err = db.Raw(query).Scan(&Cummulative_Fil_Rewards_f01624021_node_1).Error
+	if err!=nil {
+		fmt.Printf("Fil_rewards cannot be fetched, check your Error in Line 196\n")
+	}
+	prevCummulative_fil_rewards_for_node_1:=Cummulative_Fil_Rewards_f01624021_node_1
+    
+	latestCummulative_fil_rewards_for_node_1, err:=strconv.Atoi(Miner_Info_f01624021.Miner.TotalRewards)
+	if err !=nil {
+		fmt.Printf("TotalRewards Cannot be converted into integer, Check your error\n")
+		return
+	}
+
+	fmt.Printf("latestCummulative_fil_rewards_for_node_1, %d\n", latestCummulative_fil_rewards_for_node_1)
+
+	if latestCummulative_fil_rewards_for_node_1 > prevCummulative_fil_rewards_for_node_1{
+
+		FIL_REWARDS_f01624021_node_1=latestCummulative_fil_rewards_for_node_1-prevCummulative_fil_rewards_for_node_1
+	
+	}else {
+		FIL_REWARDS_f01624021_node_1=0 
+		fmt.Printf("you have no fil_rewards in last 24 hours")
+	}
+
 	QualityAdjPower_f01624021_node_1, err :=strconv.Atoi(Miner_Info_f01624021.Miner.QualityAdjPower) 
+		
 	if err !=nil {
 		fmt.Printf("Quality adjusted power_cannot be converted into int")
 	}
 	//QualityAdjPower_f01624021_node_1=QualityAdjPower_f01624021_node_1
-	Node_info:=<-c
+	Node_info:=<-c // some other go routines has send teh data and is assingin to nod_info
 	Node_info.Fil_Rewards_f01624021_node_1=FIL_REWARDS_f01624021_node_1
 	Node_info.FRP_f01624021_node_1_adjP =QualityAdjPower_f01624021_node_1
-    c<-Node_info
+    
+	c<-Node_info
 
 	fmt.Printf("Miner Id : %s\n", Miner_Info_f01624021.Id)
 	fmt.Printf("The total_qualityAdj for the node_f01624021 is %d\n",QualityAdjPower_f01624021_node_1)
@@ -212,7 +247,32 @@ func FIL_Price_n_Block_rewards_for_Each_Node(context *fiber.Ctx)error{
 		return 
 	}
 	defer wg.Done()
-	FIL_REWARDS_f01918123_node_2=Miner_Info_f01918123.Miner.BlocksMined
+	var Cummulative_Fil_Rewards_f01918123_node_2 int 
+	
+	query:="SELECT Cummulative_Fil_Rewards_f01918123_node_2 FROM node_info_daily_and_f_il_prices ORDER BY id DESC LIMIT 1"
+	
+	err = db.Raw(query).Scan(&Cummulative_Fil_Rewards_f01918123_node_2).Error
+	if err!=nil {
+		fmt.Printf("Fil_rewards cannot be fetched, check your Error in Line 196\n")
+	}
+	prevCummulative_fil_rewards_for_node_2:=Cummulative_Fil_Rewards_f01918123_node_2
+    
+	latestCummulative_fil_rewards_for_node_2, err:=strconv.Atoi(Miner_Info_f01918123.Miner.TotalRewards)
+	if err !=nil {
+		fmt.Printf("TotalRewards Cannot be converted into integer, Check your error\n")
+		return
+	}
+	fmt.Printf("latestCummulative_fil_rewards_for_node_2, %d\n", latestCummulative_fil_rewards_for_node_2)
+
+	if latestCummulative_fil_rewards_for_node_2 > prevCummulative_fil_rewards_for_node_2{
+
+		FIL_REWARDS_f01918123_node_2=latestCummulative_fil_rewards_for_node_2-prevCummulative_fil_rewards_for_node_2
+	
+	}else {
+		FIL_REWARDS_f01918123_node_2=0 
+		fmt.Printf("you have no fil_rewards in last 24 hours")
+	}
+
 	QualityAdjPower_f01918123_node_2,err:= strconv.Atoi(Miner_Info_f01918123.Miner.QualityAdjPower)
 	if err !=nil  {
 		  fmt.Printf("The Quality adjusted Power of node2 cannot be converted into int")
@@ -227,7 +287,7 @@ func FIL_Price_n_Block_rewards_for_Each_Node(context *fiber.Ctx)error{
 	fmt.Printf("The total_qualityAdj for the node_f01918123 is %d\n",QualityAdjPower_f01918123_node_2)
 	fmt.Printf("The total_blocks mined for the node__f01918123 are %d\n",FIL_REWARDS_f01918123_node_2)
 	return 
-	}()
+	}()                                                   
 
 // calculate Adjusted power and blocks reward fror f01987994
 	wg.Add(1)
@@ -246,6 +306,32 @@ func FIL_Price_n_Block_rewards_for_Each_Node(context *fiber.Ctx)error{
 	}
 	defer wg.Done()
 	FIL_REWARDS_f01987994_node_3=Miner_Info_f01987994.Miner.BlocksMined
+	var Cummulative_Fil_Rewards_f01987994_node_3 int 
+	
+	query:="SELECT Cummulative_Fil_Rewards_f01987994_node_3 FROM node_info_daily_and_f_il_prices ORDER BY id DESC LIMIT 1"
+	
+	err = db.Raw(query).Scan(&Cummulative_Fil_Rewards_f01987994_node_3).Error
+	if err!=nil {
+		fmt.Printf("Fil_rewards cannot be fetched, check your Error in Line 196\n")
+	}
+	prevCummulative_fil_rewards_for_node_3:=Cummulative_Fil_Rewards_f01987994_node_3
+    
+	latestCummulative_fil_rewards_for_node_3, err:=strconv.Atoi(Miner_Info_f01987994.Miner.TotalRewards)
+	if err !=nil {
+		fmt.Printf("TotalRewards Cannot be converted into integer, Check your error\n")
+		return
+	}
+	fmt.Printf("latestCummulative_fil_rewards_for_node_3, %d\n", latestCummulative_fil_rewards_for_node_3)
+
+	if latestCummulative_fil_rewards_for_node_3 > prevCummulative_fil_rewards_for_node_3{
+
+		FIL_REWARDS_f01987994_node_3=latestCummulative_fil_rewards_for_node_3-prevCummulative_fil_rewards_for_node_3
+	
+	}else {
+		FIL_REWARDS_f01987994_node_3=0 
+		fmt.Printf("you have no fil_rewards in last 24 hours")
+	}
+	
 	QualityAdjPower_f01987994_node_3, err :=strconv.Atoi(Miner_Info_f01987994.Miner.QualityAdjPower)
 	if err!=nil {
 		fmt.Printf("The Qaulity adjusted Power of node3 cannot be converted into int.")
@@ -259,18 +345,35 @@ func FIL_Price_n_Block_rewards_for_Each_Node(context *fiber.Ctx)error{
 	fmt.Printf("The total_blocks mined for the node_f01987994 are %d\n",FIL_REWARDS_f01987994_node_3)
 	return 
 	}()
+
 	wg.Wait()
 	Node_info:=<-c
 	fmt.Printf("The node infos are %v\n", Node_info )
-    //db:=dbConnect()
-	//FMP_investment_Calculate(&Node_info, db)
+    
+	Node_Info_Daily_and_FIl_Price:=Node_Info_Daily_and_FIl_Price{}
+
+	Node_Info_Daily_and_FIl_Price.Fil_Price= Node_info.Fil_Price
+    Node_Info_Daily_and_FIl_Price.Fil_Rewards_f01624021_node_1=Node_info.Fil_Rewards_f01624021_node_1
+    Node_Info_Daily_and_FIl_Price.Fil_Rewards_f01918123_node_2=Node_info.Fil_Rewards_f01918123_node_2
+	Node_Info_Daily_and_FIl_Price.Fil_Rewards_f01987994_node_3=Node_info.Fil_Rewards_f01987994_node_3
+	Node_Info_Daily_and_FIl_Price.FRP_f01624021_node_1_adjP=Node_info.FRP_f01624021_node_1_adjP
+	Node_Info_Daily_and_FIl_Price.FRP_f01918123_node_2_adjP=Node_info.FRP_f01918123_node_2_adjP
+	Node_Info_Daily_and_FIl_Price.FRP_f01987994_node_3_adjP=Node_info.FRP_f01987994_node_3_adjP
+	
+	/*for key,value := range Node_Info_Daily_and_FIl_Price{
+		fmt.Printf("%s:  %v\n", key, value)
+	 
+
+	}*/
+	db.Create(&Node_Info_Daily_and_FIl_Price)
 	return nil
+
 }
 
 
 type FMP_Info_for_investor struct {
-	gorm.Model 
-	ID uint   `gorm:"primaryKey"`
+	gorm.Model
+	Date time.Time  `gorm:"unique;<-:autoCreateTime"`
 	Total_Quality_adjP_For_Vogo_Daily_Basis int  `json:"total_Quality_adjP_For_Vogo_Daily_Basis"`
     Total_FIL_Reward_Vogo_daily_Basis  int 		`json:"total_FIL_Reward_Vogo_daily_Basis"`
     Total_Quality_adjP_For_Inv_daily_Basis int  `json:"total_Quality_adjP_For_Inv_daily_Basis"`
@@ -290,12 +393,12 @@ type FMP_Info_for_investor struct {
 }
 
 
-func FMP_investment_Calculate(Node_info *FMP_Investment_Integrated_info, db *gorm.DB) *FMP_Info_for_investor {
+func FMP_investment_Calculate(Node_info *Node_Info_Daily_and_FIl_Price) *FMP_Info_for_investor {
     
 	// calculated on the day of investement  i.e will remain consant from the day of investment till the 25th of the next month and on 25th at 12.00 am it wil be updated. 
 	// i.e it is  updated only once a month. 
 	//Total_Quality_adjP_on_daily_basis:=0 
-	
+	db:=DbConnect()
 	//calculate the time 
 	now:=time.Now()
 	//initiliaze the instance of struct for FMP_INFO which is the main struct where all the data will be stored. 
@@ -383,8 +486,6 @@ func FMP_investment_Calculate(Node_info *FMP_Investment_Integrated_info, db *gor
 	if err != nil {	
 		fmt.Printf("The database cannot be fetched from the database ")
 	}
-
-    
 	FMP_Info.Total_Staking=prevInfo.PrevTotalStaking+FMP_Info.Staking_on_daily_basis
 	
 	FMP_Info.Total_FIL_Rewards=prevInfo.prevTotalFILRewards+FMP_Info.Fil_Rewards_on_daily_basis
@@ -399,6 +500,7 @@ func FMP_investment_Calculate(Node_info *FMP_Investment_Integrated_info, db *gor
 
 
 func DbConnect() *gorm.DB {
+
 	err:=godotenv.Load(".env")
    if err!=nil{
 	fmt.Printf("")
@@ -419,9 +521,9 @@ func DbConnect() *gorm.DB {
 	   SslMode:dbSslMode,
 	}
     db, err:=config.Connect(&dbConfig)
-    if err != nil{
+   
+	if err != nil {
 		fmt.Printf("There is error in connecting to data\n")
 	}
-	
 	return db
 }
