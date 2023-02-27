@@ -1,7 +1,7 @@
 package main
 
 import(
-	_"fmt"
+	"fmt"
     _"time" 
 	_"context"
 	"github.com/gofiber/fiber/v2"
@@ -20,9 +20,9 @@ func main() {
 	AllowMethods:"GET. POST, PUT, DELETE",
 }))
 
-   // db:=api.DbConnect()
+    db:=api.DbConnect()
 	
-	/*if !db.Migrator().HasTable(&api.Node_Info_Daily_and_FIl_Price{} ) {
+	if !db.Migrator().HasTable(&api.Node_Info_Daily_and_FIl_Price{} ) {
 		if err := db.AutoMigrate(&api.Node_Info_Daily_and_FIl_Price{});err!=nil {
 			panic ("Failed to create table!")
 		}

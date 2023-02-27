@@ -16,8 +16,9 @@ package api
 	"github.com/joho/godotenv"
 	"strconv"
 	"os"
+	
 )
-const ATTOFILL=1e-18 
+const ATTOFILL=1e-18  
 const BYTES=1e-12
 
 type MinerDetails struct {
@@ -72,7 +73,7 @@ type  Node_Related_Info struct{
 		} `json:"controlAddresses"`
 		PeerId string `json:"peerId"`
 		MultiAddresses []string `json:"multiAddresses"`
-		SectorSize int64 `json:"sectorSize"`
+		SectorSize int `json:"sectorSize"`
 		RawBytePower string `json:"rawBytePower"`
 		QualityAdjPower string `json:"qualityAdjPower"`
 		NetworkQualityAdjPower string `json:"networkQualityAdjPower"`
@@ -108,22 +109,22 @@ type Node_Info_Daily_and_FIl_Price struct{
 	Date time.Time  `gorm:"unique;<-:autoCreateTime"`
 	Fil_Price float32 
     Current_Sector_Initial_Pledge_32GB float32 
-	Fil_Rewards_f01624021_node_1 int 
-	Fil_Rewards_f01918123_node_2 int
-	Fil_Rewards_f01987994_node_3 int
-	Cummulative_Fil_Rewards_f01624021_node_1 int 
-	Cummulative_Fil_Rewards_f01918123_node_2 int
-	Cummulative_Fil_Rewards_f01987994_node_3 int
-	FRP_f01624021_node_1_adjP int
-	FRP_f01918123_node_2_adjP int
-	FRP_f01987994_node_3_adjP int
+	Fil_Rewards_f01624021_node_1 int64
+	Fil_Rewards_f01918123_node_2 int64
+	Fil_Rewards_f01987994_node_3 int64
+	Cummulative_Fil_Rewards_f01624021_node_1 int64
+	Cummulative_Fil_Rewards_f01918123_node_2 int64
+	Cummulative_Fil_Rewards_f01987994_node_3 int64
+	FRP_f01624021_node_1_adjP int64
+	FRP_f01918123_node_2_adjP int64
+	FRP_f01987994_node_3_adjP int64
 }
 
 
 //Method to assign values to FMP_integrated_info
-func(Miner *Node_Info_Daily_and_FIl_Price)Set_Miner_Info(Fil_Price float32, Fil_Rewards_f01624021_node_1 int, Fil_Rewards_f01918123_node_2 int,
-	Fil_Rewards_f01987994_node_3 int, FRP_f01624021_node_1 int, FRP_f01918123_node_2 int, 
-	FRP_f01987994_node_3 int){
+func(Miner *Node_Info_Daily_and_FIl_Price)Set_Miner_Info(Fil_Price float32, Fil_Rewards_f01624021_node_1 int64, Fil_Rewards_f01918123_node_2 int64,
+	Fil_Rewards_f01987994_node_3 int64, FRP_f01624021_node_1 int64, FRP_f01918123_node_2 int64, 
+	FRP_f01987994_node_3 int64){
 		Miner.Fil_Price=Fil_Price
 		Miner.Fil_Rewards_f01624021_node_1=Fil_Rewards_f01624021_node_1
 		Miner.Fil_Rewards_f01918123_node_2=Fil_Rewards_f01918123_node_2
@@ -141,9 +142,9 @@ func FIL_Price_n_Block_rewards_for_Each_Node(context *fiber.Ctx)error{
 
 	//var miner Node_Info_Daily_and_FIl_Price 
 	var FIL_PRICE float32
-	var FIL_REWARDS_f01624021_node_1  int 
-	var FIL_REWARDS_f01918123_node_2  int
-	var FIL_REWARDS_f01987994_node_3 int
+	var FIL_REWARDS_f01624021_node_1  int64 
+	var FIL_REWARDS_f01918123_node_2  int64
+	var FIL_REWARDS_f01987994_node_3 int64
 	/*var QualityAdjPower_f01624021_node_1 int
 	var QualityAdjPower_f01918123_node_2 int
 	var QualityAdjPower_f01987994_node_3 int */
@@ -186,42 +187,48 @@ func FIL_Price_n_Block_rewards_for_Each_Node(context *fiber.Ctx)error{
 		return 
 	}
 	defer wg.Done()
-	var Cummulative_Fil_Rewards_f01624021_node_1 int 
+
+
+
+	var Cummulative_Fil_Rewards_f01624021_node_1 int64
 	
-	query:="SELECT Cumulative_Fil_Rewards_f01624021_node_1 FROM node_info_daily_and_f_il_prices ORDER BY id DESC LIMIT 1"
+	query:="SELECT cummulative_fil_rewards_f01624021_node_1 FROM node_info_daily_and_f_il_prices ORDER BY id DESC LIMIT 1"
 	
 	err = db.Raw(query).Scan(&Cummulative_Fil_Rewards_f01624021_node_1).Error
 	if err!=nil {
 		fmt.Printf("Fil_rewards cannot be fetched, check your Error in Line 196\n")
 	}
 	prevCummulative_fil_rewards_for_node_1:=Cummulative_Fil_Rewards_f01624021_node_1
-    
-	latestCummulative_fil_rewards_for_node_1, err:=strconv.Atoi(Miner_Info_f01624021.Miner.TotalRewards)
+	fmt.Printf("The pervious cumulative_fil_rewards_for_node_1 is %d\n",prevCummulative_fil_rewards_for_node_1)
+	
+	f, err:=strconv.ParseFloat(Miner_Info_f01624021.Miner.TotalRewards,64)
 	if err !=nil {
-		fmt.Printf("TotalRewards Cannot be converted into integer, Check your error\n")
+		fmt.Printf("Total Rewards Cannot be converted into integer, Check your error %s\n", err)
 		return
 	}
+	latestCummulative_fil_rewards_for_node_1:=int64(f*1e-18)
 
 	fmt.Printf("latestCummulative_fil_rewards_for_node_1, %d\n", latestCummulative_fil_rewards_for_node_1)
 
 	if latestCummulative_fil_rewards_for_node_1 > prevCummulative_fil_rewards_for_node_1{
 
 		FIL_REWARDS_f01624021_node_1=latestCummulative_fil_rewards_for_node_1-prevCummulative_fil_rewards_for_node_1
-	
 	}else {
 		FIL_REWARDS_f01624021_node_1=0 
 		fmt.Printf("you have no fil_rewards in last 24 hours")
 	}
 
-	QualityAdjPower_f01624021_node_1, err :=strconv.Atoi(Miner_Info_f01624021.Miner.QualityAdjPower) 
+	 QualityAdjPower_f01624021_node_1, err :=strconv.ParseInt(Miner_Info_f01624021.Miner.QualityAdjPower, 10,64) 
 		
-	if err !=nil {
-		fmt.Printf("Quality adjusted power_cannot be converted into int")
-	}
+	 if err !=nil {
+	 	fmt.Printf("Quality adjusted power_cannot be converted into int")
+	 }
+	fmt.Printf("the sector balance for node are %s\n", Miner_Info_f01624021.Miner.SecotorPledgeBalance)
 	//QualityAdjPower_f01624021_node_1=QualityAdjPower_f01624021_node_1
 	Node_info:=<-c // some other go routines has send teh data and is assingin to nod_info
 	Node_info.Fil_Rewards_f01624021_node_1=FIL_REWARDS_f01624021_node_1
 	Node_info.FRP_f01624021_node_1_adjP =QualityAdjPower_f01624021_node_1
+    Node_info.Cummulative_Fil_Rewards_f01624021_node_1=latestCummulative_fil_rewards_for_node_1
     
 	c<-Node_info
 
@@ -247,21 +254,25 @@ func FIL_Price_n_Block_rewards_for_Each_Node(context *fiber.Ctx)error{
 		return 
 	}
 	defer wg.Done()
-	var Cummulative_Fil_Rewards_f01918123_node_2 int 
+	var Cummulative_Fil_Rewards_f01918123_node_2 int64
 	
 	query:="SELECT Cummulative_Fil_Rewards_f01918123_node_2 FROM node_info_daily_and_f_il_prices ORDER BY id DESC LIMIT 1"
 	
 	err = db.Raw(query).Scan(&Cummulative_Fil_Rewards_f01918123_node_2).Error
+	
 	if err!=nil {
-		fmt.Printf("Fil_rewards cannot be fetched, check your Error in Line 196\n")
+		fmt.Printf("Fil_rewards cannot be fetched, check your Error, %s\n", err)
 	}
 	prevCummulative_fil_rewards_for_node_2:=Cummulative_Fil_Rewards_f01918123_node_2
+	fmt.Printf("The pervious cumulative_fil_rewards_for_node_2 is %d\n",prevCummulative_fil_rewards_for_node_2)
+	
     
-	latestCummulative_fil_rewards_for_node_2, err:=strconv.Atoi(Miner_Info_f01918123.Miner.TotalRewards)
+	f, err:=strconv.ParseFloat(Miner_Info_f01918123.Miner.TotalRewards, 64)
 	if err !=nil {
-		fmt.Printf("TotalRewards Cannot be converted into integer, Check your error\n")
+		fmt.Printf("Total Rewards Cannot be converted into integer, Check your error\n")
 		return
 	}
+	latestCummulative_fil_rewards_for_node_2:=int64(f*1e-18)
 	fmt.Printf("latestCummulative_fil_rewards_for_node_2, %d\n", latestCummulative_fil_rewards_for_node_2)
 
 	if latestCummulative_fil_rewards_for_node_2 > prevCummulative_fil_rewards_for_node_2{
@@ -273,13 +284,15 @@ func FIL_Price_n_Block_rewards_for_Each_Node(context *fiber.Ctx)error{
 		fmt.Printf("you have no fil_rewards in last 24 hours")
 	}
 
-	QualityAdjPower_f01918123_node_2,err:= strconv.Atoi(Miner_Info_f01918123.Miner.QualityAdjPower)
+	QualityAdjPower_f01918123_node_2,err:= strconv.ParseInt(Miner_Info_f01918123.Miner.QualityAdjPower,10,64)
 	if err !=nil  {
 		  fmt.Printf("The Quality adjusted Power of node2 cannot be converted into int")
 	}
      Node_info:= <-c
 	 Node_info.Fil_Rewards_f01918123_node_2=FIL_REWARDS_f01918123_node_2
 	 Node_info.FRP_f01918123_node_2_adjP=QualityAdjPower_f01918123_node_2
+	 Node_info.Cummulative_Fil_Rewards_f01918123_node_2=latestCummulative_fil_rewards_for_node_2
+    
 	
 	c<-Node_info
 	
@@ -305,8 +318,8 @@ func FIL_Price_n_Block_rewards_for_Each_Node(context *fiber.Ctx)error{
 		return 
 	}
 	defer wg.Done()
-	FIL_REWARDS_f01987994_node_3=Miner_Info_f01987994.Miner.BlocksMined
-	var Cummulative_Fil_Rewards_f01987994_node_3 int 
+	FIL_REWARDS_f01987994_node_3=int64(Miner_Info_f01987994.Miner.BlocksMined)
+	var Cummulative_Fil_Rewards_f01987994_node_3 int64
 	
 	query:="SELECT Cummulative_Fil_Rewards_f01987994_node_3 FROM node_info_daily_and_f_il_prices ORDER BY id DESC LIMIT 1"
 	
@@ -315,12 +328,16 @@ func FIL_Price_n_Block_rewards_for_Each_Node(context *fiber.Ctx)error{
 		fmt.Printf("Fil_rewards cannot be fetched, check your Error in Line 196\n")
 	}
 	prevCummulative_fil_rewards_for_node_3:=Cummulative_Fil_Rewards_f01987994_node_3
+
+	fmt.Printf("The pervious cumulative_fil_rewards_for_node_3 is %d\n",prevCummulative_fil_rewards_for_node_3)
+	
     
-	latestCummulative_fil_rewards_for_node_3, err:=strconv.Atoi(Miner_Info_f01987994.Miner.TotalRewards)
+	f, err:=strconv.ParseFloat(Miner_Info_f01987994.Miner.TotalRewards, 64)
 	if err !=nil {
 		fmt.Printf("TotalRewards Cannot be converted into integer, Check your error\n")
 		return
 	}
+	latestCummulative_fil_rewards_for_node_3:=int64(f*1e-18)
 	fmt.Printf("latestCummulative_fil_rewards_for_node_3, %d\n", latestCummulative_fil_rewards_for_node_3)
 
 	if latestCummulative_fil_rewards_for_node_3 > prevCummulative_fil_rewards_for_node_3{
@@ -332,17 +349,19 @@ func FIL_Price_n_Block_rewards_for_Each_Node(context *fiber.Ctx)error{
 		fmt.Printf("you have no fil_rewards in last 24 hours")
 	}
 	
-	QualityAdjPower_f01987994_node_3, err :=strconv.Atoi(Miner_Info_f01987994.Miner.QualityAdjPower)
+	QualityAdjPower_f01987994_node_3, err :=strconv.ParseInt(Miner_Info_f01987994.Miner.QualityAdjPower, 10, 64)
 	if err!=nil {
 		fmt.Printf("The Qaulity adjusted Power of node3 cannot be converted into int.")
 	}
 	Node_info:= <-c
 	Node_info.Fil_Rewards_f01987994_node_3=FIL_REWARDS_f01987994_node_3
 	Node_info.FRP_f01987994_node_3_adjP=QualityAdjPower_f01987994_node_3
-    c<-Node_info
+	Node_info.Cummulative_Fil_Rewards_f01987994_node_3=latestCummulative_fil_rewards_for_node_3
+    
+	c<-Node_info
 	fmt.Printf("Miner Id : %s\n", Miner_Info_f01987994.Id)
 	fmt.Printf("The total_qualityAdj for the node_f01987994 is %d\n",QualityAdjPower_f01987994_node_3)
-	fmt.Printf("The total_blocks mined for the node_f01987994 are %d\n",FIL_REWARDS_f01987994_node_3)
+	fmt.Printf("The Fil for the node_f01987994 are %d\n",FIL_REWARDS_f01987994_node_3)
 	return 
 	}()
 
@@ -359,6 +378,9 @@ func FIL_Price_n_Block_rewards_for_Each_Node(context *fiber.Ctx)error{
 	Node_Info_Daily_and_FIl_Price.FRP_f01624021_node_1_adjP=Node_info.FRP_f01624021_node_1_adjP
 	Node_Info_Daily_and_FIl_Price.FRP_f01918123_node_2_adjP=Node_info.FRP_f01918123_node_2_adjP
 	Node_Info_Daily_and_FIl_Price.FRP_f01987994_node_3_adjP=Node_info.FRP_f01987994_node_3_adjP
+	Node_Info_Daily_and_FIl_Price.Cummulative_Fil_Rewards_f01624021_node_1=Node_info.Cummulative_Fil_Rewards_f01624021_node_1
+	Node_Info_Daily_and_FIl_Price.Cummulative_Fil_Rewards_f01918123_node_2=Node_info.Cummulative_Fil_Rewards_f01918123_node_2
+	Node_Info_Daily_and_FIl_Price.Cummulative_Fil_Rewards_f01987994_node_3=Node_info.Cummulative_Fil_Rewards_f01987994_node_3
 	
 	/*for key,value := range Node_Info_Daily_and_FIl_Price{
 		fmt.Printf("%s:  %v\n", key, value)
@@ -374,22 +396,22 @@ func FIL_Price_n_Block_rewards_for_Each_Node(context *fiber.Ctx)error{
 type FMP_Info_for_investor struct {
 	gorm.Model
 	Date time.Time  `gorm:"unique;<-:autoCreateTime"`
-	Total_Quality_adjP_For_Vogo_Daily_Basis int  `json:"total_Quality_adjP_For_Vogo_Daily_Basis"`
-    Total_FIL_Reward_Vogo_daily_Basis  int 		`json:"total_FIL_Reward_Vogo_daily_Basis"`
-    Total_Quality_adjP_For_Inv_daily_Basis int  `json:"total_Quality_adjP_For_Inv_daily_Basis"`
-	Total_Quality_adjP_with_increased_FRP_inv int  `json:"total_Quality_adjP_With_increased_FRP_Inv"`
-	Fil_Rewards_on_daily_basis     int   `json:"fil_Rewards_on_daily_basis"`
-	Total_Fil_rewards_for_Inv int		`json:"total_Fil_rewards_for_Inv"`
-	Total_FIL_Rewards int `json:"total_FIL_Rewards"`
-	Staking_on_daily_basis int  `json:"staking_on_daily_basis"`
-	Total_Staking  int `json:"total_Staking"`
-	Total_Reward_value  int  `json:"total_Reward_value"`
+	Total_Quality_adjP_For_Vogo_Daily_Basis int64  `json:"total_Quality_adjP_For_Vogo_Daily_Basis"`
+    Total_FIL_Reward_Vogo_daily_Basis  int64		`json:"total_FIL_Reward_Vogo_daily_Basis"`
+    Total_Quality_adjP_For_Inv_daily_Basis int64  `json:"total_Quality_adjP_For_Inv_daily_Basis"`
+	Total_Quality_adjP_with_increased_FRP_inv int64  `json:"total_Quality_adjP_With_increased_FRP_Inv"`
+	Fil_Rewards_on_daily_basis     int64   `json:"fil_Rewards_on_daily_basis"`
+	Total_Fil_rewards_for_Inv int64		`json:"total_Fil_rewards_for_Inv"`
+	Total_FIL_Rewards int64 `json:"total_FIL_Rewards"`
+	Staking_on_daily_basis int64  `json:"staking_on_daily_basis"`
+	Total_Staking  int64 `json:"total_Staking"`
+	Total_Reward_value  int64  `json:"total_Reward_value"`
 	Increased_FRP_on_daily_basis float32 `json:"increase_FRP"`
 	Total_FRP float32  `json:"total_FRP"`
-	Paid_Reward_to_Investor int `json:"paid_Reward_to_Investor"`
-	Total_FIL_Paid_to_Investor int `json:"total_FIL_Paid_to_Investor"`
-	Value_of_FIL_Paid_to_Investor int  `json:"value_of_FIL_Paid_to_Investor"`
-	Value_of_Total_FIl_Paid  int  `json:"value_of_Total_FIl_Paid"`
+	Paid_Reward_to_Investor int64`json:"paid_Reward_to_Investor"`
+	Total_FIL_Paid_to_Investor int64 `json:"total_FIL_Paid_to_Investor"`
+	Value_of_FIL_Paid_to_Investor int64  `json:"value_of_FIL_Paid_to_Investor"`
+	Value_of_Total_FIl_Paid  int64  `json:"value_of_Total_FIl_Paid"`
 }
 
 
@@ -411,11 +433,10 @@ func FMP_investment_Calculate(Node_info *Node_Info_Daily_and_FIl_Price) *FMP_Inf
 		// i.e Total_quality_adjusted_power_for_VOGO
 		// i.e Total_Quality_adjusted_power_for_inv
 		
-		var Total_Quality_adjP_For_Inv_daily_Basis int 
+		var Total_Quality_adjP_For_Inv_daily_Basis int64
+		
 		// Since Node_info is updated once everyday at  
 		total_Quality_adjP_For_Vogo:=Node_info.FRP_f01624021_node_1_adjP + Node_info.FRP_f01918123_node_2_adjP + Node_info.FRP_f01987994_node_3_adjP
-		
-		Total_Quality_adjP_on_daily_basis_for_Vogo=total_Quality_adjP_For_Vogo
 		
 		FMP_Info.Total_Quality_adjP_For_Vogo_Daily_Basis=total_Quality_adjP_For_Vogo
 		
@@ -429,7 +450,7 @@ func FMP_investment_Calculate(Node_info *Node_Info_Daily_and_FIl_Price) *FMP_Inf
 		
 			FMP_Info.Total_Quality_adjP_For_Inv_daily_Basis=Total_Quality_adjP_For_Inv_daily_Basis
 	} else {
-		var Total_Quality_adjP_For_Vogo_Daily_Basis int
+		var Total_Quality_adjP_For_Vogo_Daily_Basis int64
 		
 		query := "SELECT Total_Quality_adjP_For_Vogo_Daily_Basis FROM table_name ORDER BY id DESC LIMIT 1"
 		
@@ -455,7 +476,7 @@ func FMP_investment_Calculate(Node_info *Node_Info_Daily_and_FIl_Price) *FMP_Inf
 	
 		} else {
 	
-			FMP_Info.Fil_Rewards_on_daily_basis = (total_Quality_adjP_For_Inv /Total_FIL_Reward_Vogo_daily_Basis ) * Total_FIL_Reward_Vogo_daily_Basis
+			FMP_Info.Fil_Rewards_on_daily_basis = (int64(total_Quality_adjP_For_Inv)/Total_FIL_Reward_Vogo_daily_Basis ) * Total_FIL_Reward_Vogo_daily_Basis
 	}
 
 	Staking_on_daily_basis := FMP_Info.Fil_Rewards_on_daily_basis
@@ -475,10 +496,10 @@ func FMP_investment_Calculate(Node_info *Node_Info_Daily_and_FIl_Price) *FMP_Inf
 	query := "SELECT Total_FIL_Reward, Total_FRP, Total_Staking,Total_Quality_adjP_with_increased_FRP_inv  FROM table_name ORDER BY id DESC LIMIT 1"
 	
 	type PrevInfo struct {
-		prevTotalFILRewards int
+		prevTotalFILRewards int64
 		prevTotalFRP float32
-		PrevTotalStaking int
-		prevTotal_Quality_AdjPow int
+		PrevTotalStaking int64
+		prevTotal_Quality_AdjPow int64
 	}
 	var prevInfo PrevInfo
 	err := db.Raw(query).Scan(&prevInfo).Error
@@ -492,7 +513,7 @@ func FMP_investment_Calculate(Node_info *Node_Info_Daily_and_FIl_Price) *FMP_Inf
 	
 	FMP_Info.Total_FRP=prevInfo.prevTotalFRP+FMP_Info.Increased_FRP_on_daily_basis
     
-	FMP_Info.Total_Quality_adjP_with_increased_FRP_inv= int(FMP_Info.Increased_FRP_on_daily_basis+float32(prevInfo.prevTotal_Quality_AdjPow))
+	FMP_Info.Total_Quality_adjP_with_increased_FRP_inv= int64(FMP_Info.Increased_FRP_on_daily_basis+float32(prevInfo.prevTotal_Quality_AdjPow))
 	
 	db.Create(&FMP_Info)
 	return FMP_Info
