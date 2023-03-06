@@ -7,9 +7,7 @@ import(
 	"github.com/gofiber/fiber/v2"
 	_"net/http"
 	"github.com/achnir97/go_lang_filbytes/api"
-	"github.com/gofiber/fiber/v2/middleware/cors"
-
-	
+	"github.com/gofiber/fiber/v2/middleware/cors"	
 )
 
 func main() {
@@ -21,9 +19,8 @@ func main() {
 }))
 
     db:=api.DbConnect()
-	
-	if !db.Migrator().HasTable(&api.Node_Info_Daily_and_FIl_Price{} ) {
-		if err := db.AutoMigrate(&api.Node_Info_Daily_and_FIl_Price{});err!=nil {
+	if !db.Migrator().HasTable(&api.FMP_Info_for_investor{} ) {
+		if err := db.AutoMigrate(&api.FMP_Info_for_investor{});err!=nil {
 			panic ("Failed to create table!")
 		}
 		fmt.Println("Table created!")
@@ -34,7 +31,9 @@ func main() {
 	//db.Create( &api.FMP_Investment_Integrated_info)
 
 	//db.Find(&api.FMP_Info_for_investor{},"id=?",1)*/
-	app.Get("/apis", api.FIL_Price_n_Block_rewards_for_Each_Node)
+	//app.Get("/apis", api.FIL_Price_n_Block_rewards_for_Each_Node)
+	api.QueryNodeinfo(db)
+	api.Query_Fmp_table(db)
 	app.Listen(":4000")
 }
 
