@@ -2,7 +2,7 @@ package main
 
 import(
 	"fmt"
-    _"time" 
+    "time" 
 	_"context"
 	"github.com/gofiber/fiber/v2"
 	_"net/http"
@@ -32,7 +32,13 @@ func main() {
 
 	//db.Find(&api.FMP_Info_for_investor{},"id=?",1)*/
 	//app.Get("/apis", api.FIL_Price_n_Block_rewards_for_Each_Node)
+	
 	api.QueryNodeinfo(db)
+	
+	api.FMP_investment_Calculate()
+
+	time.Sleep(1*time.Millisecond)
+
 	api.Query_Fmp_table(db)
 	app.Listen(":4000")
 }

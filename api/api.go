@@ -103,8 +103,6 @@ type  Node_Related_Info struct{
 	Address string `json:"address"`
 }
 
-
-
 type Node_Info_Daily_and_FIl_Price struct{ 
 	gorm.Model
 	Date  string 
@@ -421,47 +419,80 @@ type FMP_Info_for_investor struct {
 }
 
 
-func FMP_investment_Calculate() *FMP_Info_for_investor {
+func FMP_investment_Calculate() {
     
 	// calculated on the day of investement  i.e will remain consant from the day of investment till the 25th of the next month and on 25th at 12.00 am it wil be updated. 
 	// i.e it is  updated only once a month. 
 	//Total_Quality_adjP_on_daily_basis:=0 
+	
 	db:=DbConnect()
+	
 	Node_info:=QueryNodeinfo(db)
+	fmt.Println(Node_info.FRP_f01624021_node_1_adjP)
+	fmt.Println(Node_info.FRP_f01918123_node_2_adjP)
+	fmt.Println(Node_info.FRP_f01987994_node_3_adjP)
+	fmt.Println(Node_info.Fil_Price)
+	fmt.Printf(Node_info.Date)
+	fmt.Println(Node_info.Current_Sector_Initial_Pledge_32GB)
+	fmt.Println(Node_info.Fil_Rewards_f01624021_node_1)
+	fmt.Println(Node_info.Fil_Rewards_f01918123_node_2)
+	fmt.Println(Node_info.Fil_Rewards_f01987994_node_3)
+
+	
 	FMP_INFO:=Query_Fmp_table(db)
+	fmt.Println(FMP_INFO.Date)
+	fmt.Println(FMP_INFO.Total_Quality_adjP_For_Vogo_Daily_Basis)
+	fmt.Println(FMP_INFO.Total_FIL_Reward_Vogo_daily_Basis)
+	fmt.Println(FMP_INFO.Total_Quality_adjP_For_Inv_daily_Basis)
+	
+
 	//calculate the time 
 	now:=time.Now()
 	//initiliaze the instance of struct for FMP_INFO which is the main struct where all the data will be stored. 
 	FMP_Info := &FMP_Info_for_investor{}
 
 	// Checks if the date is 25th of the month and time is 0.00 am 
-	if now.Day()==25 && now.Hour()==0 && now.Minute()==0{
+	if now.Day()==25 && now.Hour()==0 && now.Minute()==0 {
 	   // Since Node_info is updated once everyday at  
 		total_Quality_adjP_For_Vogo:=Node_info.FRP_f01624021_node_1_adjP+ Node_info.FRP_f01918123_node_2_adjP + Node_info.FRP_f01987994_node_3_adjP
 		FMP_Info.Total_Quality_adjP_For_Vogo_Daily_Basis=total_Quality_adjP_For_Vogo
-		FMP_Info.Total_Quality_adjP_For_Inv_daily_Basis=FMP_INFO.Total_Quality_adjP_For_Inv_daily_Basis
+		FMP_Info.Total_Quality_adjP_For_Inv_daily_Basis=FMP_INFO.Total_Quality_adjP_with_increased_FRP_inv
 	} else {
 		
 		FMP_Info.Total_Quality_adjP_For_Vogo_Daily_Basis=FMP_INFO.Total_Quality_adjP_For_Vogo_Daily_Basis
+		fmt.Printf("Total_Quaity_adjP_For_Vogo_Daily_Basis\n")
+		FMP_Info.Total_Quality_adjP_For_Inv_daily_Basis=FMP_INFO.Total_Quality_adjP_For_Inv_daily_Basis
 	}
 		
 // query from thd node_info_daily_f_il_price
 
 	Total_FIL_Reward_Vogo_daily_Basis := Node_info.Fil_Rewards_f01624021_node_1 +Node_info.Fil_Rewards_f01918123_node_2 + Node_info.Fil_Rewards_f01987994_node_3
+	
 	FMP_Info.Total_FIL_Reward_Vogo_daily_Basis= Total_FIL_Reward_Vogo_daily_Basis
-
-	total_Quality_adjP_For_Inv := 500 
+    fmt.Printf("FMP_Info.Total_FIL_Reward_Vogo_daily_Basis %d\n", FMP_Info.Total_FIL_Reward_Vogo_daily_Basis)
+	
+	total_Quality_adjP_For_Inv := FMP_Info.Total_Quality_adjP_For_Inv_daily_Basis
+	
+	fmt.Printf("total_Quality_adjP_For_Inv %d\n", total_Quality_adjP_For_Inv)
 	/*500 Tib will be on the day of investment and wll be used to calculate the increased FRMo the date of investement 
 	till the 25 th of the each moent
 	*/
 	
-	if Total_FIL_Reward_Vogo_daily_Basis == 0 {
-	
-		FMP_Info.Fil_Rewards_on_daily_basis_for_inv= 0
-	
+	if (FMP_Info.Total_FIL_Reward_Vogo_daily_Basis != 0){
+
+		fmt.Printf("FMP_Info.Total_Quality_adjP_For_Vogo_Daily_Basis %d\n",FMP_Info.Total_Quality_adjP_For_Vogo_Daily_Basis)
+        fmt.Printf("Total_FIl_Reward_Vogo_daily_basis %d\n",Total_FIL_Reward_Vogo_daily_Basis)
+		fmt.Printf("totalQaulity_adjP_For_Inv %d\n", total_Quality_adjP_For_Inv)
+		total_quality_adjp_vogo:= FMP_Info.Total_Quality_adjP_For_Vogo_Daily_Basis 
+		fil_rewards_for_inv:=(total_Quality_adjP_For_Inv * FMP_Info.Total_FIL_Reward_Vogo_daily_Basis)/total_quality_adjp_vogo	
+		
+		fmt.Printf("Fil_rewards_for_inv: %d\n",fil_rewards_for_inv)
+
+		FMP_Info.Fil_Rewards_on_daily_basis_for_inv = int64(fil_rewards_for_inv)
+		fmt.Printf("FMP_Info.Fil_Rewards_on_daily_basis_for_inv %d\n",FMP_Info.Fil_Rewards_on_daily_basis_for_inv )
 		} else {
-	
-			FMP_Info.Fil_Rewards_on_daily_basis_for_inv = (int64(total_Quality_adjP_For_Inv)/FMP_Info.Total_Quality_adjP_For_Vogo_Daily_Basis ) * Total_FIL_Reward_Vogo_daily_Basis
+
+			FMP_Info.Fil_Rewards_on_daily_basis_for_inv= 0.0	
 	}
 
 	Staking_on_daily_basis := FMP_Info.Fil_Rewards_on_daily_basis_for_inv
@@ -477,10 +508,11 @@ func FMP_investment_Calculate() *FMP_Info_for_investor {
 	
 		} else {
 	
-			FMP_Info.Increased_FRP_on_daily_basis = float32(Staking_on_daily_basis)/float32(Sector_initial_pledge * 32)
-	}
+			FMP_Info.Increased_FRP_on_daily_basis = (float32(Staking_on_daily_basis)*(32.0)/float32(Sector_initial_pledge))/1000.0
+		    fmt.Printf("FMP_Info.Increased_FRP_on_daily_basis %f\n",FMP_Info.Increased_FRP_on_daily_basis)
+		}
 	
-	
+
 	prevTotalFILRewards := FMP_INFO.Total_FIL_Rewards
 	prevTotalFRP:= FMP_INFO.Total_FRP
 	PrevTotalStaking:=FMP_INFO.Total_Staking
@@ -490,13 +522,16 @@ func FMP_investment_Calculate() *FMP_Info_for_investor {
 	FMP_Info.Total_FIL_Rewards=prevTotalFILRewards+FMP_Info.Fil_Rewards_on_daily_basis_for_inv
 	FMP_Info.Total_FRP=prevTotalFRP+FMP_Info.Increased_FRP_on_daily_basis
 	FMP_Info.Total_Quality_adjP_with_increased_FRP_inv= int64(FMP_Info.Increased_FRP_on_daily_basis+float32(prevTotal_Quality_AdjPow_inv))	
-	db.Create(&FMP_Info)
-	return FMP_Info
+	FMP_Info.Date=Node_info.Date
+	FMP_Info.Total_Reward_value=int64(float32(FMP_Info.Total_FIL_Rewards)* Node_info.Fil_Price)
+	
+	 db.Create(&FMP_Info)
+	//return FMP_Info
 }
 
 
 func QueryNodeinfo(db *gorm.DB) Node_Info_Daily_and_FIl_Price_ {
-	query:="SELECT * from node_info_daily_and_f_il_prices ORDER BY DATE ASC LIMIT 1"
+	query:="SELECT * from node_info_daily_and_f_il_prices ORDER BY DATE ASC LIMIT 1 OFFSET 29"
 	var node_info Node_Info_Daily_and_FIl_Price_
 	err:=db.Raw(query).Scan(&node_info).Error
 	if err!=nil {
@@ -508,7 +543,7 @@ func QueryNodeinfo(db *gorm.DB) Node_Info_Daily_and_FIl_Price_ {
 
 
 func Query_Fmp_table(db *gorm.DB) FMP_Info_for_investor_{
-	query:= " SELECT * from  fmp_info_for_investors ORDER BY DATE ASC LIMIT 1"
+	query:= " SELECT * from  fmp_info_for_investors ORDER BY DATE ASC LIMIT 1 OFFSET 28"
 	var FMP_Info FMP_Info_for_investor_
 	err:=db.Raw(query).Scan(&FMP_Info).Error
 	if err !=nil {
@@ -539,6 +574,7 @@ type FMP_Info_for_investor_ struct {
    Value_of_FIL_Paid_to_Investor int64
    Value_of_Total_FIl_Paid  int64  }
 // struct to get data base from the database where data were stored from the api call. 
+
 type Node_Info_Daily_and_FIl_Price_ struct{ 
 		Date  string 
 		Fil_Price float32 
