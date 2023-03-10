@@ -431,7 +431,7 @@ func FMP_investment_Calculate() {
 	FMP_Info := &FMP_Info_for_investor{}
 
 	// Checks if the date is 25th of the month and time is 0.00 am 
-	if now.Day()==25 && now.Hour()==0 && now.Minute()==0 {
+	if now.Day()==25 {
 	   // Since Node_info is updated once everyday at  
 		total_Quality_adjP_For_Vogo:=Node_info.FRP_f01624021_node_1_adjP+ Node_info.FRP_f01918123_node_2_adjP + Node_info.FRP_f01987994_node_3_adjP
 		FMP_Info.Total_Quality_adjP_For_Vogo_Daily_Basis=total_Quality_adjP_For_Vogo
