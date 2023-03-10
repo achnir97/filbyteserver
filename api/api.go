@@ -4,7 +4,7 @@ package api
 	"time"
 	"net/http"
 	_"github.com/go-playground/validator/v10"
-	"github.com/gofiber/fiber/v2"
+	_"github.com/gofiber/fiber/v2"
 	_"io/ioutil"
 	_"gorm.io/gorm"
 	"encoding/json"
@@ -119,23 +119,10 @@ type Node_Info_Daily_and_FIl_Price struct{
 	FRP_f01987994_node_3_adjP int64
 }
 
-
-//Method to assign values to FMP_integrated_info
-func(Miner *Node_Info_Daily_and_FIl_Price)Set_Miner_Info(Fil_Price float32, Fil_Rewards_f01624021_node_1 int64, Fil_Rewards_f01918123_node_2 int64,
-	Fil_Rewards_f01987994_node_3 int64, FRP_f01624021_node_1 int64, FRP_f01918123_node_2 int64, 
-	FRP_f01987994_node_3 int64){
-		Miner.Fil_Price=Fil_Price
-		Miner.Fil_Rewards_f01624021_node_1=Fil_Rewards_f01624021_node_1
-		Miner.Fil_Rewards_f01918123_node_2=Fil_Rewards_f01918123_node_2
-		Miner.Fil_Rewards_f01987994_node_3=Fil_Rewards_f01987994_node_3
-		Miner.FRP_f01624021_node_1_adjP=FRP_f01624021_node_1
-		Miner.FRP_f01918123_node_2_adjP=FRP_f01918123_node_2
-		Miner.FRP_f01987994_node_3_adjP=FRP_f01987994_node_3
-}
-
 //Get FIL_Rewards and Quality adjusted power of node f01624021 on daily basis 
-func FIL_Price_n_Block_rewards_for_Each_Node(context *fiber.Ctx)error{ 
-    var wg sync.WaitGroup
+
+func FIL_Price_n_Block_rewards_for_Each_Node() error{
+	var wg sync.WaitGroup
     db:=DbConnect()
 	c:=make(chan Node_Info_Daily_and_FIl_Price,1)
 
@@ -144,19 +131,16 @@ func FIL_Price_n_Block_rewards_for_Each_Node(context *fiber.Ctx)error{
 	var FIL_REWARDS_f01624021_node_1  int64 
 	var FIL_REWARDS_f01918123_node_2  int64
 	var FIL_REWARDS_f01987994_node_3 int64
-	/*var QualityAdjPower_f01624021_node_1 int
-	var QualityAdjPower_f01918123_node_2 int
-	var QualityAdjPower_f01987994_node_3 int */
-
+	
     // get the price of FILCOIN on daily basis from the coingecko api. 
     wg.Add(1)
 	go func() {
 	response, err := http.Get("https://api.coingecko.com/api/v3/simple/price?ids=Filecoin&vs_currencies=KRW")
 	if err!=nil{
 			fmt.Printf("Thee http request failed with erro %s\n", err)
-			context.Status(http.StatusBadRequest).JSON(&fiber.Map{
-				"Message":"Couldnot fetch FIL_Price"})
+			return 
 	}
+
 	defer response.Body.Close()
 	var FilPrice Fil_price
 	if err:=json.NewDecoder(response.Body).Decode(&FilPrice);err!=nil{
@@ -176,8 +160,6 @@ func FIL_Price_n_Block_rewards_for_Each_Node(context *fiber.Ctx)error{
 		response, err:=http.Get("https://filfox.info/api/v1/address/f01624021")
 		if err !=nil {
 		fmt. Printf("The http Request failed with error %s\n", err)
-		context.Status(http.StatusBadRequest).JSON(&fiber.Map{
-			"Message":"Couldnot fetch Total_Rewards_For_Each_Node"})
 		return 
 	}
 	defer response.Body.Close()
@@ -248,8 +230,6 @@ func FIL_Price_n_Block_rewards_for_Each_Node(context *fiber.Ctx)error{
 		response, err:=http.Get("https://filfox.info/api/v1/address/f01918123")
 		if err !=nil {
 		fmt. Printf("The http Request failed with error %s\n", err)
-		context.Status(http.StatusBadRequest).JSON(&fiber.Map{
-			"Message":"Couldnot fetch Total_Rewards_For_Each_Node"})
 		return 
 	}
 	defer response.Body.Close()
@@ -312,8 +292,6 @@ func FIL_Price_n_Block_rewards_for_Each_Node(context *fiber.Ctx)error{
 		response, err:=http.Get("https://filfox.info/api/v1/address/f01987994")
 		if err !=nil {
 		fmt. Printf("The http Request failed with error %s\n", err)
-		context.Status(http.StatusBadRequest).JSON(&fiber.Map{
-			"Message":"Couldnot fetch Total_Rewards_For_Each_Node"})
 		return 
 	}
 	defer response.Body.Close()
@@ -395,6 +373,7 @@ func FIL_Price_n_Block_rewards_for_Each_Node(context *fiber.Ctx)error{
 	return nil
 
 }
+
 
 
 type FMP_Info_for_investor struct {

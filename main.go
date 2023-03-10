@@ -2,44 +2,67 @@ package main
 
 import(
 	"fmt"
-    "time" 
-	_"context"
-	"github.com/gofiber/fiber/v2"
-	_"net/http"
+	_"encoding/json"
+	"log"
+	"net/http"
+	_"gorm.io/gorm"
+	"github.com/gorilla/mux"
+	"github.com/rs/cors"	
+	"github.com/achnir97/go_lang_filbytes/endpoints"
 	"github.com/achnir97/go_lang_filbytes/api"
-	"github.com/gofiber/fiber/v2/middleware/cors"	
+	"github.com/robfig/cron"
+	"time"
 )
 
+var hasRunToday bool
+
 func main() {
-	app:=fiber.New()
-	app.Use(cors.New(cors.Config{
-	AllowOrigins:"*",
-	AllowHeaders:"Origin, Content-Type, Accept",
-	AllowMethods:"GET. POST, PUT, DELETE",
-}))
-
-    db:=api.DbConnect()
-	if !db.Migrator().HasTable(&api.FMP_Info_for_investor{} ) {
-		if err := db.AutoMigrate(&api.FMP_Info_for_investor{});err!=nil {
-			panic ("Failed to create table!")
+	// Run the continous code in a go routine 
+	go runContinously()
+	
+	// Run the daily code at 12.00 am midnight every day. 
+	c:=cron.New()
+	c.AddFunc("0 0 * * *", func(){
+		if !hasRunToday{
+			runOnceADay()
+			hasRunToday=true
 		}
-		fmt.Println("Table created!")
-	} else {
-		fmt.Println("Table already exists")
+		
+	})
+
+	c.Start()
+	// Reset the flag at midnight {
+		for {
+		now:=time.Now()
+		midnight:=time.Date(now.Year(), now.Month(), now.Day()+1, 0,0,0,0, now.Location())
+		time.Sleep(midnight.Sub(now))
+		hasRunToday=false
 	}
-	//db.Create(&api.Node_Info_Daily_and_FIl_Price{})
-	//db.Create( &api.FMP_Investment_Integrated_info)
 
-	//db.Find(&api.FMP_Info_for_investor{},"id=?",1)*/
-	//app.Get("/apis", api.FIL_Price_n_Block_rewards_for_Each_Node)
-	
-	api.QueryNodeinfo(db)
-	
-	api.FMP_investment_Calculate()
+}
 
-	time.Sleep(1*time.Millisecond)
+func  runContinously() {
+	for {
+		r := mux.NewRouter()
+		// Register the endpoints with gorilla/mux router
+		   r.HandleFunc("/calculate", endpoints.GetInvFormation).Methods(http.MethodGet)
+			corsHandler := cors.New(cors.Options{
+				AllowedOrigins:   []string{"http://localhost:3000"},
+				AllowedMethods:   []string{"GET", "HEAD", "POST", "PUT", "DELETE", "OPTIONS"},
+				AllowCredentials: true,
+			}).Handler(r)
+			log.Fatal(http.ListenAndServe(":8080", corsHandler))
+			fmt.Printf("Serving is running at port 8080")
+	}
+}
 
-	api.Query_Fmp_table(db)
-	app.Listen(":4000")
+// will make an api call once a day 
+func runOnceADay(){
+	err:=api. FIL_Price_n_Block_rewards_for_Each_Node
+	if err !=nil{
+		fmt.Printf("The Error occured on the execution of the function")
+	}
+	fmt.Printf("The new data are fetched successfully and stored in the database.")
+
 }
 
