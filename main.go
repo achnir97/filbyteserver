@@ -10,18 +10,17 @@ import(
 	"github.com/rs/cors"	
 	"github.com/achnir97/go_lang_filbytes/endpoints"
 	"github.com/achnir97/go_lang_filbytes/api"
-	"github.com/robfig/cron"
-	"time"
+	_"github.com/robfig/cron"
+	_"time"
 )
 
 var hasRunToday bool
 
 func main() {
 	// Run the continous code in a go routine 
-	go runContinously()
-	
+	runOnceADay()
 	// Run the daily code at 12.00 am midnight every day. 
-	c:=cron.New()
+/*	c:=cron.New()
 	c.AddFunc("0 0 * * *", func(){
 		if !hasRunToday{
 			runOnceADay()
@@ -29,7 +28,6 @@ func main() {
 		}
 		
 	})
-
 	c.Start()
 	// Reset the flag at midnight {
 		for {
@@ -37,8 +35,9 @@ func main() {
 		midnight:=time.Date(now.Year(), now.Month(), now.Day()+1, 0,0,0,0, now.Location())
 		time.Sleep(midnight.Sub(now))
 		hasRunToday=false
-	}
+	}*/
 
+	
 }
 
 func  runContinously() {
@@ -56,13 +55,13 @@ func  runContinously() {
 	}
 }
 
+
+
 // will make an api call once a day 
 func runOnceADay(){
-	err:=api. FIL_Price_n_Block_rewards_for_Each_Node
-	if err !=nil{
-		fmt.Printf("The Error occured on the execution of the function")
-	}
-	fmt.Printf("The new data are fetched successfully and stored in the database.")
+	
+	api.FIL_Price_n_Block_rewards_for_Each_Node()
+
 
 }
 

@@ -121,7 +121,7 @@ type Node_Info_Daily_and_FIl_Price struct{
 
 //Get FIL_Rewards and Quality adjusted power of node f01624021 on daily basis 
 
-func FIL_Price_n_Block_rewards_for_Each_Node() error{
+func FIL_Price_n_Block_rewards_for_Each_Node() {
 	var wg sync.WaitGroup
     db:=DbConnect()
 	c:=make(chan Node_Info_Daily_and_FIl_Price,1)
@@ -131,6 +131,7 @@ func FIL_Price_n_Block_rewards_for_Each_Node() error{
 	var FIL_REWARDS_f01624021_node_1  int64 
 	var FIL_REWARDS_f01918123_node_2  int64
 	var FIL_REWARDS_f01987994_node_3 int64
+	
 	
     // get the price of FILCOIN on daily basis from the coingecko api. 
     wg.Add(1)
@@ -350,9 +351,7 @@ func FIL_Price_n_Block_rewards_for_Each_Node() error{
 	wg.Wait()
 	Node_info:=<-c
 	fmt.Printf("The node infos are %v\n", Node_info )
-    
 	Node_Info_Daily_and_FIl_Price:=Node_Info_Daily_and_FIl_Price{}
-
 	Node_Info_Daily_and_FIl_Price.Fil_Price= Node_info.Fil_Price
     Node_Info_Daily_and_FIl_Price.Fil_Rewards_f01624021_node_1=Node_info.Fil_Rewards_f01624021_node_1
     Node_Info_Daily_and_FIl_Price.Fil_Rewards_f01918123_node_2=Node_info.Fil_Rewards_f01918123_node_2
@@ -363,14 +362,8 @@ func FIL_Price_n_Block_rewards_for_Each_Node() error{
 	Node_Info_Daily_and_FIl_Price.Cummulative_Fil_Rewards_f01624021_node_1=Node_info.Cummulative_Fil_Rewards_f01624021_node_1
 	Node_Info_Daily_and_FIl_Price.Cummulative_Fil_Rewards_f01918123_node_2=Node_info.Cummulative_Fil_Rewards_f01918123_node_2
 	Node_Info_Daily_and_FIl_Price.Cummulative_Fil_Rewards_f01987994_node_3=Node_info.Cummulative_Fil_Rewards_f01987994_node_3
-	
-	/*for key,value := range Node_Info_Daily_and_FIl_Price{
-		fmt.Printf("%s:  %v\n", key, value)
-	}*/
-
 	db.Create(&Node_Info_Daily_and_FIl_Price)
-	
-	return nil
+	return
 
 }
 
