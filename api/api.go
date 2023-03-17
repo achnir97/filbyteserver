@@ -106,7 +106,7 @@ type Node_Related_Info struct {
 
 type Node_Info_Daily_and_FIl_Price struct {
 	gorm.Model
-	Date                                     string `gorm."uniqueIndex"`
+	Date                                     string `gorm."Date"`
 	Fil_Price                                float32
 	Current_Sector_Initial_Pledge_32GB       float32
 	Fil_Rewards_f01624021_node_1             float32
@@ -532,35 +532,39 @@ type FMP_Info_for_investor_ struct {
 	Value_of_Total_FIl_Paid                   float32
 }
 type FMP_Info_for_investor_updates struct {
-	Date                                                                   string
-	Total_Quality_adjP_For_Vogo_Daily_Basis                                float32
-	Fil_rewards_Daily_basis                                                float32
-	Daily_TwentyFive_percent_Reward                                        float32
-	Daily_SeventyFive_percent_Locked_Reward                                float32
-	Cumulative_fil_Reward                                                  float32
-	Daily_Release_1_180_of_SeventyFive_percent_Reward                      float32
-	Cumulative_TwentyFive_percent_Reward_plus_1_180_locked_Reward          float32
-	Cumulative_SeventyFive_percent_Locked_Reward_minus_1_180_locked_Reward float32
-	Vogo_25_percent_Reward                                                 float32
-	Vogo_75_percent_Reward                                                 float32
-	Daily_TwentyFive_percent_Reward_for_inv                                float32
-	Cumulative_TwentyFive_percent_Reward_for_Inv                           float32
-	Daily_Seventy_five_percent_locked_reward_for_inv                       float32
-	Cumulative_Seventy_five_percent_locked_reward_for_inv                  float32
-	Daily_Release_of_1__180_of_locked_Reward_for_inv                       float32
-	Cumulative_Release_of_1__180_of_locked_Reward_for_inv                  float32
-	Daily_Staking_of_inv                                                   float32
-	Cumulative_Total_staking_of_inv                                        float32
-	FRP_Adj_Power_for_inv                                                  float32
-	Total_Fil_rewards_for_Inv_on_daily_basis                               float32
-	Frp_Cumulative_Fil_Sum_for_Inv                                         float32
-	Daily_twenty_five_percent_Reward_for_KSL_P1                            float32
-	Daily_seventy_five_percent_Reward_for_KSL_P1                           float32
-	Cumulative_TwentyFive_percent_Reward_for_KSL_P1                        float32
-	Cumulative_Seventy_five_percent_Reward_for_KSL_P1                      float32
-	Daily_One_Eighty_Release_for_KSL_P1                                    float32
-	Cumulative_of_Daily_One_Eighty_Release_for_KSL_P1                      float32
-	graduation_messages_for_inv                                            string
+	Date                                                                   string  `json:"column:Date"`
+	Total_Quality_adjP_For_Vogo_Daily_Basis                                float32 `json:"total_Quality_adjP_For_Vogo_Daily_Basis"`
+	Fil_rewards_Daily_basis                                                float32 `json:"fil_rewards_Daily_basis"`
+	Daily_TwentyFive_percent_Reward                                        float32 `json:"daily_TwentyFive_percent_Reward"`
+	Daily_SeventyFive_percent_Locked_Reward                                float32 `json:"daily_SeventyFive_percent_Locked_Reward"`
+	Cumulative_fil_Reward                                                  float32 `json:"cumulative_fil_Reward"`
+	Daily_Release_1_180_of_SeventyFive_percent_Reward                      float32 `json:"daily_Release_1_180_of_SeventyFive_percent_Reward"`
+	Cumulative_TwentyFive_percent_Reward_plus_1_180_locked_Reward          float32 `json:"cumulative_TwentyFive_percent_Reward_"`
+	Cumulative_SeventyFive_percent_Locked_Reward_minus_1_180_locked_Reward float32 `json:"cumulative_SeventyFive_percent_Locked_Reward_"`
+	Vogo_25_percent_Reward                                                 float32 `json:"vogo_25_percent_Reward"`
+	Vogo_75_percent_Reward                                                 float32 `json:"vogo_75_percent_Reward"`
+	Daily_TwentyFive_percent_Reward_for_inv                                float32 `json:"daily_TwentyFive_percent_Reward_for_inv"`
+	Cumulative_TwentyFive_percent_Reward_for_Inv                           float32 `json:"cumulative_TwentyFive_percent_Reward_for_inv"`
+	Daily_Seventy_five_percent_locked_reward_for_inv                       float32 `json:"daily_Seventy_five_percent_Locked_Reward_for_inv"`
+	Cumulative_Seventy_five_percent_locked_reward_for_inv                  float32 `json:"cumulative_Seventy_five_percent_Locked_Reward_for_inv"`
+	Daily_Release_of_1__180_of_locked_Reward_for_inv                       float32 `json:"daily_Release_of_1__180_of_Locked_Reward_for_inv"`
+	Cumulative_Release_of_1__180_of_locked_Reward_for_inv                  float32 `json:"cumulative_Release_of_1__180_of_Locked_Reward_for_inv"`
+	Daily_Staking_of_inv                                                   float32 `json:"daily_Staking_of_inv"`
+	Cumulative_Total_staking_of_inv                                        float32 `json:"cumulative_Total_staking_of_inv"`
+	FRP_Adj_Power_for_inv                                                  float32 `json:"FRP_Adj_Power_for_inv"`
+	Total_Fil_rewards_for_Inv_on_daily_basis                               float32 `json:"total_Fil_rewards_for_Inv_on_daily_basis"`
+	Frp_Cumulative_Fil_Sum_for_Inv                                         float32 `json:"frp_Cumulative_Fil_Sum_for_Inv"`
+	Daily_twenty_five_percent_Reward_for_KSL_P1                            float32 `json:"daily_twenty_five_percent_Reward_for_KSL_P1"`
+	Daily_seventy_five_percent_Reward_for_KSL_P1                           float32 `json:"daily_seventy_five_percent_Reward_for_KSL_P1"`
+	Cumulative_TwentyFive_percent_Reward_for_KSL_P1                        float32 `json:"cumulative_TwentyFive_percent_Reward_for_KSL_P1"`
+	Cumulative_Seventy_five_percent_Reward_for_KSL_P1                      float32 `json:"cumulative_Seventy_five_percent_Reward_for_KSL_"`
+	Daily_One_Eighty_Release_for_KSL_P1                                    float32 `json:"daily_One_Eighty_Release_for_KSL_P1"`
+	Cumulative_of_Daily_One_Eighty_Release_for_KSL_P1                      float32 `json:"cumulative_of_Daily_One_Eighty_Release_for_KSL_P1"`
+	Value_of_Seventy_Five_percent__locked_Reward_for_KSL_P1                float32 `json:"value_of_Seventy_Five_percent__locked_Reward_KSL_p1"`
+	Total_FIl_Reward_KSL_P1_on_Daily_basis                                 float32 `json:"total_FIl_Reward_KSL_P1_on_Daily_basis"`
+	Cumulative_Total_Fil_Reward_KSL_P1                                     float32 `json:"cumulative_Total_Fil_Reward_for_KSL_P1"`
+	Pledge_investement_Present_value_KSL_p1                                float32 `json:"pledge_investement_Present_value_KSL_p1"`
+	Graduation_messages_for_inv                                            string  `json:"graduation_messages_for_inv"`
 }
 
 //FRP 투자계정 (KSL_FRP_500) 현황
@@ -592,7 +596,7 @@ func Calculate_KSL_FRP_500() {
 	FMP_INFO.Date = Date
 	// Querry the FMP_Info_for_investor_updates for previous FMP_Info_for_investor_
 	if prev_fmp_info.FRP_Adj_Power_for_inv < 1500.0 {
-		FMP_INFO.graduation_messages_for_inv = "YOUR STILL YET TO GRADAUTE"
+		FMP_INFO.Graduation_messages_for_inv = "YOUR STILL YET TO GRADAUTE"
 		if Total_FiL_Reward_Vogo == 0 {
 			FMP_INFO.Fil_rewards_Daily_basis = 0
 			FMP_INFO.Cumulative_fil_Reward = Prev_day_Cumulative_fil_Reward
@@ -654,7 +658,7 @@ func Calculate_KSL_FRP_500() {
 		FMP_INFO.FRP_Adj_Power_for_inv = Prev_day_FRP_Adj_Power_for_inv
 	}
 	FMP_INFO = prev_fmp_info
-	FMP_INFO.graduation_messages_for_inv = "YOU ARE GRADUATED FROM INVESTMENT"
+	FMP_INFO.Graduation_messages_for_inv = "YOU ARE GRADUATED FROM INVESTMENT"
 
 	db.Create(&FMP_INFO)
 }
