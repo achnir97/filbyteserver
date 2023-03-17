@@ -106,7 +106,7 @@ type Node_Related_Info struct {
 
 type Node_Info_Daily_and_FIl_Price struct {
 	gorm.Model
-	Date                                     string
+	Date                                     string `gorm."uniqueIndex"`
 	Fil_Price                                float32
 	Current_Sector_Initial_Pledge_32GB       float32
 	Fil_Rewards_f01624021_node_1             float32
@@ -120,8 +120,12 @@ type Node_Info_Daily_and_FIl_Price struct {
 	FRP_f01987994_node_3_adjP                float32
 }
 
-//Get FIL_Rewards and Quality adjusted power of node f01624021 on daily basis
+// func (Node_Info_Daily_and_FIl_Price *Node_Info_Daily_and_FIl_Price) BeforeCreate(*gorm.DB) error {
+// 	db.SetColumn("Date", time.Now().Format("2006-01-02"))
+// 	return
+// }
 
+//Get FIL_Rewards and Quality adjusted power of node f01624021 on daily basis
 func FIL_Price_n_Block_rewards_for_Each_Node() {
 	var wg sync.WaitGroup
 	db := DbConnect()
@@ -595,7 +599,7 @@ func Calculate_KSL_FRP_500() {
 			FMP_INFO.Daily_Staking_of_inv = FMP_INFO.Daily_Release_of_1__180_of_locked_Reward_for_inv
 			FMP_INFO.Cumulative_Total_staking_of_inv = Prev_day_Cumulative_Total_staking_of_inv + FMP_INFO.Daily_Staking_of_inv
 			FMP_INFO.Vogo_75_percent_Reward = FMP_INFO.Cumulative_SeventyFive_percent_Locked_Reward_minus_1_180_locked_Reward - FMP_INFO.Cumulative_Seventy_five_percent_locked_reward_for_inv
-			FMP_INFO.Vogo_25_percent_Reward = FMP_INFO.Cumulative_TwentyFive_percent_Reward_plus_1_180_locked_Reward - (FMP_INFO.Cumulative_Total_staking_of_inv - FMP_INFO.Cumulative_TwentyFive_percent_Reward_for_Inv)
+			FMP_INFO.Vogo_25_percent_Reward = FMP_INFO.Cumulative_TwentyFive_percent_Reward_plus_1_180_locked_Reward - FMP_INFO.Cumulative_TwentyFive_percent_Reward_for_Inv - FMP_INFO.Cumulative_Release_of_1__180_of_locked_Reward_for_inv
 			FMP_INFO.Total_Fil_rewards_for_Inv_on_daily_basis = 0.0
 			FMP_INFO.Frp_Cumulative_Fil_Sum_for_Inv = Prev_day_Frp_Cumulative_Fil_Sum_for_Inv
 			if date_today == 26 {
@@ -619,7 +623,7 @@ func Calculate_KSL_FRP_500() {
 		FMP_INFO.Daily_Staking_of_inv = FMP_INFO.Daily_TwentyFive_percent_Reward_for_inv + FMP_INFO.Daily_Release_1_180_of_SeventyFive_percent_Reward
 		FMP_INFO.Cumulative_Total_staking_of_inv = Prev_day_Cumulative_Total_staking_of_inv + FMP_INFO.Daily_Staking_of_inv
 		FMP_INFO.Vogo_75_percent_Reward = FMP_INFO.Cumulative_SeventyFive_percent_Locked_Reward_minus_1_180_locked_Reward - FMP_INFO.Cumulative_Seventy_five_percent_locked_reward_for_inv
-		FMP_INFO.Vogo_25_percent_Reward = FMP_INFO.Cumulative_TwentyFive_percent_Reward_plus_1_180_locked_Reward - (FMP_INFO.Cumulative_Total_staking_of_inv - FMP_INFO.Cumulative_TwentyFive_percent_Reward_for_Inv)
+		FMP_INFO.Vogo_25_percent_Reward = FMP_INFO.Cumulative_TwentyFive_percent_Reward_plus_1_180_locked_Reward - FMP_INFO.Cumulative_TwentyFive_percent_Reward_for_Inv - FMP_INFO.Cumulative_Release_of_1__180_of_locked_Reward_for_inv
 		FMP_INFO.Total_Fil_rewards_for_Inv_on_daily_basis = FMP_INFO.Daily_TwentyFive_percent_Reward_for_inv + FMP_INFO.Daily_Seventy_five_percent_locked_reward_for_inv
 
 		if date_today == 26 {
