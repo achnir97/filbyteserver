@@ -5,7 +5,7 @@ import (
 	"fmt"
 	"log"
 	"net/http"
-	_ "time"
+	"time"
 
 	"github.com/achnir97/go_lang_filbytes/api"
 	"github.com/achnir97/go_lang_filbytes/endpoints"
@@ -18,6 +18,8 @@ import (
 //var hasRunToday bool
 
 func main() {
+	updated_time := time.Now().String()
+	fmt.Println(updated_time)
 	// Run the continous code in a go routine
 	//runOnceADay()
 	// Run the daily code at 12.00 am midnight every day.
@@ -44,16 +46,16 @@ func main() {
 			AllowMethods: "GET. POST, PUT, DELETE",
 	}))*/
 
-	db := api.DbConnect()
+	// db := api.DbConnect()
 
-	if !db.Migrator().HasTable(&api.FMP_Info_for_investor_updates{}) {
-		if err := db.AutoMigrate(&api.FMP_Info_for_investor_updates{}); err != nil {
-			panic("Failed to create table!")
-		}
-		fmt.Println("Table created!")
-	} else {
-		fmt.Println("Table already exists")
-	}
+	// if !db.Migrator().HasTable(&api.FMP_Info_for_investor_updates{}) {
+	// 	if err := db.AutoMigrate(&api.FMP_Info_for_investor_updates{}); err != nil {
+	// 		panic("Failed to create table!")
+	// 	}
+	// 	fmt.Println("Table created!")
+	// } else {
+	// 	fmt.Println("Table already exists")
+	// }
 	//db.Create(&api.Node_Info_Daily_and_FIl_Price{})
 	//db.Create( &api.FMP_Investment_Integrated_info)
 

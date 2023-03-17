@@ -109,15 +109,15 @@ type Node_Info_Daily_and_FIl_Price struct {
 	Date                                     string
 	Fil_Price                                float32
 	Current_Sector_Initial_Pledge_32GB       float32
-	Fil_Rewards_f01624021_node_1             int64
-	Fil_Rewards_f01918123_node_2             int64
-	Fil_Rewards_f01987994_node_3             int64
-	Cummulative_Fil_Rewards_f01624021_node_1 int64
-	Cummulative_Fil_Rewards_f01918123_node_2 int64
-	Cummulative_Fil_Rewards_f01987994_node_3 int64
-	FRP_f01624021_node_1_adjP                int64
-	FRP_f01918123_node_2_adjP                int64
-	FRP_f01987994_node_3_adjP                int64
+	Fil_Rewards_f01624021_node_1             float32
+	Fil_Rewards_f01918123_node_2             float32
+	Fil_Rewards_f01987994_node_3             float32
+	Cummulative_Fil_Rewards_f01624021_node_1 float32
+	Cummulative_Fil_Rewards_f01918123_node_2 float32
+	Cummulative_Fil_Rewards_f01987994_node_3 float32
+	FRP_f01624021_node_1_adjP                float32
+	FRP_f01918123_node_2_adjP                float32
+	FRP_f01987994_node_3_adjP                float32
 }
 
 //Get FIL_Rewards and Quality adjusted power of node f01624021 on daily basis
@@ -129,9 +129,9 @@ func FIL_Price_n_Block_rewards_for_Each_Node() {
 
 	//var miner Node_Info_Daily_and_FIl_Price
 	var FIL_PRICE float32
-	var FIL_REWARDS_f01624021_node_1 int64
-	var FIL_REWARDS_f01918123_node_2 int64
-	var FIL_REWARDS_f01987994_node_3 int64
+	var FIL_REWARDS_f01624021_node_1 float32
+	var FIL_REWARDS_f01918123_node_2 float32
+	var FIL_REWARDS_f01987994_node_3 float32
 
 	// get the price of FILCOIN on daily basis from the coingecko api.
 	wg.Add(1)
@@ -169,7 +169,7 @@ func FIL_Price_n_Block_rewards_for_Each_Node() {
 		}
 		defer wg.Done()
 
-		var Cummulative_Fil_Rewards_f01624021_node_1 int64
+		var Cummulative_Fil_Rewards_f01624021_node_1 float32
 
 		query := "SELECT cummulative_fil_rewards_f01624021_node_1 FROM node_info_daily_and_f_il_prices ORDER BY id DESC LIMIT 1"
 
@@ -178,7 +178,7 @@ func FIL_Price_n_Block_rewards_for_Each_Node() {
 			fmt.Printf("Fil_rewards cannot be fetched, check your Error, %s\n", err)
 		}
 		prevCummulative_fil_rewards_for_node_1 := Cummulative_Fil_Rewards_f01624021_node_1
-		fmt.Printf("The pervious cumulative_fil_rewards_for_node_1 is %d\n", prevCummulative_fil_rewards_for_node_1)
+		fmt.Printf("The pervious cumulative_fil_rewards_for_node_1 is %f\n", prevCummulative_fil_rewards_for_node_1)
 
 		f, err := strconv.ParseFloat(Miner_Info_f01624021.Miner.TotalRewards, 64)
 		/*Information about the total rewards is string type so we convertinto float */
@@ -187,15 +187,15 @@ func FIL_Price_n_Block_rewards_for_Each_Node() {
 			return
 		}
 		/*
-			total Rewards are then converted into int64 after the conversion into FILL
+			total Rewards are then converted into float32 after the conversion into FILL
 			Since 1FIL = 1e^18
 		*/
-		latestCummulative_fil_rewards_for_node_1 := int64(f * 1e-18)
+		latestCummulative_fil_rewards_for_node_1 := float32(f * 1e-18)
 
-		fmt.Printf("latestCummulative_fil_rewards_for_node_1, %d\n", latestCummulative_fil_rewards_for_node_1)
+		fmt.Printf("latestCummulative_fil_rewards_for_node_1, %f\n", latestCummulative_fil_rewards_for_node_1)
 
 		if latestCummulative_fil_rewards_for_node_1 > prevCummulative_fil_rewards_for_node_1 {
-			FIL_REWARDS_f01624021_node_1 = latestCummulative_fil_rewards_for_node_1 - prevCummulative_fil_rewards_for_node_1
+			FIL_REWARDS_f01624021_node_1 = float32(latestCummulative_fil_rewards_for_node_1 - prevCummulative_fil_rewards_for_node_1)
 		} else {
 			FIL_REWARDS_f01624021_node_1 = 0
 			fmt.Printf("you have no fil_rewards in last 24 hours")
@@ -210,14 +210,14 @@ func FIL_Price_n_Block_rewards_for_Each_Node() {
 		//QualityAdjPower_f01624021_node_1=QualityAdjPower_f01624021_node_1
 		Node_info := <-c // some other go routines has send teh data and is assingin to nod_info
 		Node_info.Fil_Rewards_f01624021_node_1 = FIL_REWARDS_f01624021_node_1
-		Node_info.FRP_f01624021_node_1_adjP = QualityAdjPower_f01624021_node_1
-		Node_info.Cummulative_Fil_Rewards_f01624021_node_1 = latestCummulative_fil_rewards_for_node_1
+		Node_info.FRP_f01624021_node_1_adjP = float32(QualityAdjPower_f01624021_node_1)
+		Node_info.Cummulative_Fil_Rewards_f01624021_node_1 = float32(latestCummulative_fil_rewards_for_node_1)
 
 		c <- Node_info
 
 		fmt.Printf("Miner Id : %s\n", Miner_Info_f01624021.Id)
 		fmt.Printf("The total_qualityAdj for the node_f01624021 is %d\n", QualityAdjPower_f01624021_node_1)
-		fmt.Printf("The total_blocks mined for the node_f01624021 are %d\n", FIL_REWARDS_f01624021_node_1)
+		fmt.Printf("The total_blocks mined for the node_f01624021 are %f\n", FIL_REWARDS_f01624021_node_1)
 
 	}()
 
@@ -235,7 +235,7 @@ func FIL_Price_n_Block_rewards_for_Each_Node() {
 			return
 		}
 		defer wg.Done()
-		var Cummulative_Fil_Rewards_f01918123_node_2 int64
+		var Cummulative_Fil_Rewards_f01918123_node_2 float32
 
 		query := "SELECT Cummulative_Fil_Rewards_f01918123_node_2 FROM node_info_daily_and_f_il_prices ORDER BY id DESC LIMIT 1"
 
@@ -245,19 +245,19 @@ func FIL_Price_n_Block_rewards_for_Each_Node() {
 			fmt.Printf("Fil_rewards cannot be fetched, check your Error, %s\n", err)
 		}
 		prevCummulative_fil_rewards_for_node_2 := Cummulative_Fil_Rewards_f01918123_node_2
-		fmt.Printf("The pervious cumulative_fil_rewards_for_node_2 is %d\n", prevCummulative_fil_rewards_for_node_2)
+		fmt.Printf("The pervious cumulative_fil_rewards_for_node_2 is %f\n", prevCummulative_fil_rewards_for_node_2)
 
 		f, err := strconv.ParseFloat(Miner_Info_f01918123.Miner.TotalRewards, 64)
 		if err != nil {
 			fmt.Printf("Total Rewards Cannot be converted into integer, Check your error\n")
 			return
 		}
-		latestCummulative_fil_rewards_for_node_2 := int64(f * 1e-18)
-		fmt.Printf("latestCummulative_fil_rewards_for_node_2, %d\n", latestCummulative_fil_rewards_for_node_2)
+		latestCummulative_fil_rewards_for_node_2 := float32(f * 1e-18)
+		fmt.Printf("latestCummulative_fil_rewards_for_node_2, %f\n", latestCummulative_fil_rewards_for_node_2)
 
 		if latestCummulative_fil_rewards_for_node_2 > prevCummulative_fil_rewards_for_node_2 {
 
-			FIL_REWARDS_f01918123_node_2 = latestCummulative_fil_rewards_for_node_2 - prevCummulative_fil_rewards_for_node_2
+			FIL_REWARDS_f01918123_node_2 = float32(latestCummulative_fil_rewards_for_node_2 - prevCummulative_fil_rewards_for_node_2)
 
 		} else {
 			FIL_REWARDS_f01918123_node_2 = 0
@@ -269,15 +269,15 @@ func FIL_Price_n_Block_rewards_for_Each_Node() {
 			fmt.Printf("The Quality adjusted Power of node2 cannot be converted into int")
 		}
 		Node_info := <-c
-		Node_info.Fil_Rewards_f01918123_node_2 = FIL_REWARDS_f01918123_node_2
-		Node_info.FRP_f01918123_node_2_adjP = QualityAdjPower_f01918123_node_2
-		Node_info.Cummulative_Fil_Rewards_f01918123_node_2 = latestCummulative_fil_rewards_for_node_2
+		Node_info.Fil_Rewards_f01918123_node_2 = float32(FIL_REWARDS_f01918123_node_2)
+		Node_info.FRP_f01918123_node_2_adjP = float32(QualityAdjPower_f01918123_node_2)
+		Node_info.Cummulative_Fil_Rewards_f01918123_node_2 = float32(latestCummulative_fil_rewards_for_node_2)
 
 		c <- Node_info
 
 		fmt.Printf("Miner Id : %s\n", Miner_Info_f01918123.Id)
 		fmt.Printf("The total_qualityAdj for the node_f01918123 is %d\n", QualityAdjPower_f01918123_node_2)
-		fmt.Printf("The total_blocks mined for the node__f01918123 are %d\n", FIL_REWARDS_f01918123_node_2)
+		fmt.Printf("The total_blocks mined for the node__f01918123 are %f\n", FIL_REWARDS_f01918123_node_2)
 
 	}()
 
@@ -295,8 +295,8 @@ func FIL_Price_n_Block_rewards_for_Each_Node() {
 			return
 		}
 		defer wg.Done()
-		FIL_REWARDS_f01987994_node_3 = int64(Miner_Info_f01987994.Miner.BlocksMined)
-		var Cummulative_Fil_Rewards_f01987994_node_3 int64
+		FIL_REWARDS_f01987994_node_3 = float32(Miner_Info_f01987994.Miner.BlocksMined)
+		var Cummulative_Fil_Rewards_f01987994_node_3 float32
 
 		query := "SELECT Cummulative_Fil_Rewards_f01987994_node_3 FROM node_info_daily_and_f_il_prices ORDER BY id DESC LIMIT 1"
 
@@ -306,19 +306,19 @@ func FIL_Price_n_Block_rewards_for_Each_Node() {
 		}
 		prevCummulative_fil_rewards_for_node_3 := Cummulative_Fil_Rewards_f01987994_node_3
 
-		fmt.Printf("The pervious cumulative_fil_rewards_for_node_3 is %d\n", prevCummulative_fil_rewards_for_node_3)
+		fmt.Printf("The pervious cumulative_fil_rewards_for_node_3 is %f\n", prevCummulative_fil_rewards_for_node_3)
 
 		f, err := strconv.ParseFloat(Miner_Info_f01987994.Miner.TotalRewards, 64)
 		if err != nil {
 			fmt.Printf("TotalRewards Cannot be converted into integer, Check your error\n")
 			return
 		}
-		latestCummulative_fil_rewards_for_node_3 := int64(f * 1e-18)
-		fmt.Printf("latestCummulative_fil_rewards_for_node_3, %d\n", latestCummulative_fil_rewards_for_node_3)
+		latestCummulative_fil_rewards_for_node_3 := float32(f * 1e-18)
+		fmt.Printf("latestCummulative_fil_rewards_for_node_3, %f\n", latestCummulative_fil_rewards_for_node_3)
 
 		if latestCummulative_fil_rewards_for_node_3 > prevCummulative_fil_rewards_for_node_3 {
 
-			FIL_REWARDS_f01987994_node_3 = latestCummulative_fil_rewards_for_node_3 - prevCummulative_fil_rewards_for_node_3
+			FIL_REWARDS_f01987994_node_3 = float32(latestCummulative_fil_rewards_for_node_3 - prevCummulative_fil_rewards_for_node_3)
 
 		} else {
 			FIL_REWARDS_f01987994_node_3 = 0
@@ -331,13 +331,13 @@ func FIL_Price_n_Block_rewards_for_Each_Node() {
 		}
 		Node_info := <-c
 		Node_info.Fil_Rewards_f01987994_node_3 = FIL_REWARDS_f01987994_node_3
-		Node_info.FRP_f01987994_node_3_adjP = QualityAdjPower_f01987994_node_3
-		Node_info.Cummulative_Fil_Rewards_f01987994_node_3 = latestCummulative_fil_rewards_for_node_3
+		Node_info.FRP_f01987994_node_3_adjP = float32(QualityAdjPower_f01987994_node_3)
+		Node_info.Cummulative_Fil_Rewards_f01987994_node_3 = float32(latestCummulative_fil_rewards_for_node_3)
 
 		c <- Node_info
 		fmt.Printf("Miner Id : %s\n", Miner_Info_f01987994.Id)
 		fmt.Printf("The total_qualityAdj for the node_f01987994 is %d\n", QualityAdjPower_f01987994_node_3)
-		fmt.Printf("The Fil for the node_f01987994 are %d\n", FIL_REWARDS_f01987994_node_3)
+		fmt.Printf("The Fil for the node_f01987994 are %f\n", FIL_REWARDS_f01987994_node_3)
 
 	}()
 
@@ -362,22 +362,22 @@ func FIL_Price_n_Block_rewards_for_Each_Node() {
 type FMP_Info_for_investor struct {
 	gorm.Model
 	Date                                      string  `json:"date"`
-	Total_Quality_adjP_For_Vogo_Daily_Basis   int64   `json:"total_Quality_adjP_For_Vogo_Daily_Basis"`
-	Total_FIL_Reward_Vogo_daily_Basis         int64   `json:"total_FIL_Reward_Vogo_daily_Basis"`
-	Total_Quality_adjP_For_Inv_daily_Basis    int64   `json:"total_Quality_adjP_For_Inv_daily_Basis"`
-	Total_Quality_adjP_with_increased_FRP_inv int64   `json:"total_Quality_adjP_With_increased_FRP_Inv"`
-	Fil_Rewards_on_daily_basis_for_inv        int64   `json:"fil_Rewards_on_daily_basis"`
-	Total_Fil_rewards_for_Inv                 int64   `json:"total_Fil_rewards_for_Inv"`
-	Total_FIL_Rewards                         int64   `json:"total_FIL_Rewards"`
-	Staking_on_daily_basis                    int64   `json:"staking_on_daily_basis"`
-	Total_Staking                             int64   `json:"total_Staking"`
-	Total_Reward_value                        int64   `json:"total_Reward_value"`
+	Total_Quality_adjP_For_Vogo_Daily_Basis   float32 `json:"total_Quality_adjP_For_Vogo_Daily_Basis"`
+	Total_FIL_Reward_Vogo_daily_Basis         float32 `json:"total_FIL_Reward_Vogo_daily_Basis"`
+	Total_Quality_adjP_For_Inv_daily_Basis    float32 `json:"total_Quality_adjP_For_Inv_daily_Basis"`
+	Total_Quality_adjP_with_increased_FRP_inv float32 `json:"total_Quality_adjP_With_increased_FRP_Inv"`
+	Fil_Rewards_on_daily_basis_for_inv        float32 `json:"fil_Rewards_on_daily_basis"`
+	Total_Fil_rewards_for_Inv                 float32 `json:"total_Fil_rewards_for_Inv"`
+	Total_FIL_Rewards                         float32 `json:"total_FIL_Rewards"`
+	Staking_on_daily_basis                    float32 `json:"staking_on_daily_basis"`
+	Total_Staking                             float32 `json:"total_Staking"`
+	Total_Reward_value                        float32 `json:"total_Reward_value"`
 	Increased_FRP_on_daily_basis              float32 `json:"increase_FRP"`
 	Total_FRP                                 float32 `json:"total_FRP"`
-	Paid_Reward_to_Investor                   int64   `json:"paid_Reward_to_Investor"`
-	Total_FIL_Paid_to_Investor                int64   `json:"total_FIL_Paid_to_Investor"`
-	Value_of_FIL_Paid_to_Investor             int64   `json:"value_of_FIL_Paid_to_Investor"`
-	Value_of_Total_FIl_Paid                   int64   `json:"value_of_Total_FIl_Paid"`
+	Paid_Reward_to_Investor                   float32 `json:"paid_Reward_to_Investor"`
+	Total_FIL_Paid_to_Investor                float32 `json:"total_FIL_Paid_to_Investor"`
+	Value_of_FIL_Paid_to_Investor             float32 `json:"value_of_FIL_Paid_to_Investor"`
+	Value_of_Total_FIl_Paid                   float32 `json:"value_of_Total_FIl_Paid"`
 }
 
 func FMP_investment_Calculate() {
@@ -411,10 +411,10 @@ func FMP_investment_Calculate() {
 	FMP_Info := &FMP_Info_for_investor{}
 
 	// Checks if the date is 25th of the month and time is 0.00 am
-	if now.Day() == 25 {
+	if now.Day() == 26 {
 		// Since Node_info is updated once everyday at
 		total_Quality_adjP_For_Vogo := Node_info.FRP_f01624021_node_1_adjP + Node_info.FRP_f01918123_node_2_adjP + Node_info.FRP_f01987994_node_3_adjP
-		FMP_Info.Total_Quality_adjP_For_Vogo_Daily_Basis = total_Quality_adjP_For_Vogo
+		FMP_Info.Total_Quality_adjP_For_Vogo_Daily_Basis = float32(total_Quality_adjP_For_Vogo)
 		FMP_Info.Total_Quality_adjP_For_Inv_daily_Basis = FMP_INFO.Total_Quality_adjP_with_increased_FRP_inv
 	} else {
 
@@ -428,27 +428,27 @@ func FMP_investment_Calculate() {
 	Total_FIL_Reward_Vogo_daily_Basis := Node_info.Fil_Rewards_f01624021_node_1 + Node_info.Fil_Rewards_f01918123_node_2 + Node_info.Fil_Rewards_f01987994_node_3
 
 	FMP_Info.Total_FIL_Reward_Vogo_daily_Basis = Total_FIL_Reward_Vogo_daily_Basis
-	fmt.Printf("FMP_Info.Total_FIL_Reward_Vogo_daily_Basis %d\n", FMP_Info.Total_FIL_Reward_Vogo_daily_Basis)
+	fmt.Printf("FMP_Info.Total_FIL_Reward_Vogo_daily_Basis %f\n", FMP_Info.Total_FIL_Reward_Vogo_daily_Basis)
 
 	total_Quality_adjP_For_Inv := FMP_Info.Total_Quality_adjP_For_Inv_daily_Basis
 
-	fmt.Printf("total_Quality_adjP_For_Inv %d\n", total_Quality_adjP_For_Inv)
+	fmt.Printf("total_Quality_adjP_For_Inv %f\n", total_Quality_adjP_For_Inv)
 	/*500 Tib will be on the day of investment and wll be used to calculate the increased FRMo the date of investement
 	till the 25 th of the each moent
 	*/
 
 	if FMP_Info.Total_FIL_Reward_Vogo_daily_Basis != 0 {
 
-		fmt.Printf("FMP_Info.Total_Quality_adjP_For_Vogo_Daily_Basis %d\n", FMP_Info.Total_Quality_adjP_For_Vogo_Daily_Basis)
-		fmt.Printf("Total_FIl_Reward_Vogo_daily_basis %d\n", Total_FIL_Reward_Vogo_daily_Basis)
-		fmt.Printf("totalQaulity_adjP_For_Inv %d\n", total_Quality_adjP_For_Inv)
+		fmt.Printf("FMP_Info.Total_Quality_adjP_For_Vogo_Daily_Basis %f\n", FMP_Info.Total_Quality_adjP_For_Vogo_Daily_Basis)
+		fmt.Printf("Total_FIl_Reward_Vogo_daily_basis %f\n", Total_FIL_Reward_Vogo_daily_Basis)
+		fmt.Printf("totalQaulity_adjP_For_Inv %f\n", total_Quality_adjP_For_Inv)
 		total_quality_adjp_vogo := FMP_Info.Total_Quality_adjP_For_Vogo_Daily_Basis
-		fil_rewards_for_inv := (total_Quality_adjP_For_Inv * FMP_Info.Total_FIL_Reward_Vogo_daily_Basis) / total_quality_adjp_vogo
+		fil_rewards_for_inv := float32(total_Quality_adjP_For_Inv*FMP_Info.Total_FIL_Reward_Vogo_daily_Basis) / total_quality_adjp_vogo
 
-		fmt.Printf("Fil_rewards_for_inv: %d\n", fil_rewards_for_inv)
+		fmt.Printf("Fil_rewards_for_inv: %f\n", fil_rewards_for_inv)
 
-		FMP_Info.Fil_Rewards_on_daily_basis_for_inv = int64(fil_rewards_for_inv)
-		fmt.Printf("FMP_Info.Fil_Rewards_on_daily_basis_for_inv %d\n", FMP_Info.Fil_Rewards_on_daily_basis_for_inv)
+		FMP_Info.Fil_Rewards_on_daily_basis_for_inv = float32(fil_rewards_for_inv)
+		fmt.Printf("FMP_Info.Fil_Rewards_on_daily_basis_for_inv %f\n", FMP_Info.Fil_Rewards_on_daily_basis_for_inv)
 	} else {
 
 		FMP_Info.Fil_Rewards_on_daily_basis_for_inv = 0.0
@@ -478,9 +478,9 @@ func FMP_investment_Calculate() {
 	FMP_Info.Total_Staking = PrevTotalStaking + FMP_Info.Staking_on_daily_basis
 	FMP_Info.Total_FIL_Rewards = prevTotalFILRewards + FMP_Info.Fil_Rewards_on_daily_basis_for_inv
 	FMP_Info.Total_FRP = prevTotalFRP + FMP_Info.Increased_FRP_on_daily_basis
-	FMP_Info.Total_Quality_adjP_with_increased_FRP_inv = int64(FMP_Info.Increased_FRP_on_daily_basis + float32(prevTotal_Quality_AdjPow_inv))
+	FMP_Info.Total_Quality_adjP_with_increased_FRP_inv = float32(FMP_Info.Increased_FRP_on_daily_basis + float32(prevTotal_Quality_AdjPow_inv))
 	FMP_Info.Date = Node_info.Date
-	FMP_Info.Total_Reward_value = int64(float32(FMP_Info.Total_FIL_Rewards) * Node_info.Fil_Price)
+	FMP_Info.Total_Reward_value = float32(float32(FMP_Info.Total_FIL_Rewards) * Node_info.Fil_Price)
 
 	db.Create(&FMP_Info)
 	//return FMP_Info
@@ -510,25 +510,26 @@ func Query_Fmp_table(db *gorm.DB) FMP_Info_for_investor_ {
 
 type FMP_Info_for_investor_ struct {
 	Date                                      string
-	Total_Quality_adjP_For_Vogo_Daily_Basis   int64
-	Total_FIL_Reward_Vogo_daily_Basis         int64
-	Total_Quality_adjP_For_Inv_daily_Basis    int64
-	Total_Quality_adjP_with_increased_FRP_inv int64
-	Fil_Rewards_on_daily_basis_for_inv        int64
-	Total_Fil_rewards_for_Inv                 int64
-	Total_FIL_Rewards                         int64
-	Staking_on_daily_basis                    int64
-	Total_Staking                             int64
-	Total_Reward_value                        int64
+	Total_Quality_adjP_For_Vogo_Daily_Basis   float32
+	Total_FIL_Reward_Vogo_daily_Basis         float32
+	Total_Quality_adjP_For_Inv_daily_Basis    float32
+	Total_Quality_adjP_with_increased_FRP_inv float32
+	Fil_Rewards_on_daily_basis_for_inv        float32
+	Total_Fil_rewards_for_Inv                 float32
+	Total_FIL_Rewards                         float32
+	Staking_on_daily_basis                    float32
+	Total_Staking                             float32
+	Total_Reward_value                        float32
 	Increased_FRP_on_daily_basis              float32
 	Total_FRP                                 float32
-	Paid_Reward_to_Investor                   int64
-	Total_FIL_Paid_to_Investor                int64
-	Value_of_FIL_Paid_to_Investor             int64
-	Value_of_Total_FIl_Paid                   int64
+	Paid_Reward_to_Investor                   float32
+	Total_FIL_Paid_to_Investor                float32
+	Value_of_FIL_Paid_to_Investor             float32
+	Value_of_Total_FIl_Paid                   float32
 }
 type FMP_Info_for_investor_updates struct {
 	Date                                                                   string
+	Total_Quality_adjP_For_Vogo_Daily_Basis                                float32
 	Fil_rewards_Daily_basis                                                float32
 	Daily_TwentyFive_percent_Reward                                        float32
 	Daily_SeventyFive_percent_Locked_Reward                                float32
@@ -546,17 +547,23 @@ type FMP_Info_for_investor_updates struct {
 	Cumulative_Release_of_1__180_of_locked_Reward_for_inv                  float32
 	Daily_Staking_of_inv                                                   float32
 	Cumulative_Total_staking_of_inv                                        float32
+	FRP_Adj_Power_for_inv                                                  float32
+	Total_Fil_rewards_for_Inv_on_daily_basis                               float32
+	Frp_Cumulative_Fil_Sum_for_Inv                                         float32
+	graduation_messages_for_inv                                            string
 }
 
-func New_Calculate() {
+//FRP 투자계정 (KSL_FRP_500) 현황
+func Calculate_KSL_FRP_500() {
 	db := DbConnect()
 	Info_from_api := Query_Api_table()
 	prev_fmp_info := Query_Fmp_table_update()
 	Total_FiL_Reward_Vogo := float32(Info_from_api.Total_FIL_Reward_Vogo_daily_Basis)
+	Total_Quality_adjP_on_daily_basis_for_Inv := Info_from_api.Total_Quality_adjP_For_Vogo_Daily_Basis
+	date_today := time.Now().Day()
+
 	Date := Info_from_api.Date
 	var FMP_INFO FMP_Info_for_investor_updates
-
-	// Querry the FMP_Info_for_investor_updates for previous FMP_Info_for_investor_
 
 	Prev_day_Cumulative_fil_Reward := prev_fmp_info.Cumulative_fil_Reward
 	Prev_day_seventyFive_percent_Locked_Reward := prev_fmp_info.Cumulative_SeventyFive_percent_Locked_Reward_minus_1_180_locked_Reward
@@ -565,43 +572,63 @@ func New_Calculate() {
 	Prev_day_Cumulative_Seventy_five_percent_locked_reward_for_inv := prev_fmp_info.Cumulative_Seventy_five_percent_locked_reward_for_inv
 	Prev_day_Cumulative_Release_of_1__180_of_locked_Reward_for_inv := prev_fmp_info.Cumulative_Release_of_1__180_of_locked_Reward_for_inv
 	Prev_day_Cumulative_Total_staking_of_inv := prev_fmp_info.Cumulative_Total_staking_of_inv
-
-	// extract the total_filReward_vogo_daily_basis from FMP_Info_for_investor database.
+	Prev_day_FRP_Adj_Power_for_inv := prev_fmp_info.FRP_Adj_Power_for_inv
+	Prev_day_Frp_Cumulative_Fil_Sum_for_Inv := prev_fmp_info.Frp_Cumulative_Fil_Sum_for_Inv
+	Current_Sector_Initial_Pledge_32GB := 0.2015
 	FMP_INFO.Date = Date
-	if Total_FiL_Reward_Vogo == 0 {
-		FMP_INFO.Fil_rewards_Daily_basis = 0
-		FMP_INFO.Cumulative_fil_Reward = Prev_day_Cumulative_fil_Reward
-		FMP_INFO.Daily_TwentyFive_percent_Reward = 0.0
-		FMP_INFO.Daily_SeventyFive_percent_Locked_Reward = 0.0
-		FMP_INFO.Cumulative_SeventyFive_percent_Locked_Reward_minus_1_180_locked_Reward = Prev_day_seventyFive_percent_Locked_Reward * (1.0 - 1.0/180.0)
-		FMP_INFO.Cumulative_TwentyFive_percent_Reward_plus_1_180_locked_Reward = Prev_day_twentyFive_percent_Reward + (1.0/180.0)*Prev_day_seventyFive_percent_Locked_Reward
-		FMP_INFO.Daily_TwentyFive_percent_Reward_for_inv = 0.0
-		FMP_INFO.Cumulative_TwentyFive_percent_Reward_for_Inv = Prev_day_Cumulative_twentyFive_percent_Reward_for_inv
-		FMP_INFO.Daily_Seventy_five_percent_locked_reward_for_inv = 0.0
-		FMP_INFO.Cumulative_Seventy_five_percent_locked_reward_for_inv = Prev_day_Cumulative_Seventy_five_percent_locked_reward_for_inv * (1.0 - 1.0/180.0)
+	// Querry the FMP_Info_for_investor_updates for previous FMP_Info_for_investor_
+	if prev_fmp_info.FRP_Adj_Power_for_inv < 1500.0 {
+		FMP_INFO.graduation_messages_for_inv = "YOUR STILL YET TO GRADAUTE"
+		if Total_FiL_Reward_Vogo == 0 {
+			FMP_INFO.Fil_rewards_Daily_basis = 0
+			FMP_INFO.Cumulative_fil_Reward = Prev_day_Cumulative_fil_Reward
+			FMP_INFO.Daily_TwentyFive_percent_Reward = 0.0
+			FMP_INFO.Daily_SeventyFive_percent_Locked_Reward = 0.0
+			FMP_INFO.Cumulative_SeventyFive_percent_Locked_Reward_minus_1_180_locked_Reward = Prev_day_seventyFive_percent_Locked_Reward * (1.0 - 1.0/180.0)
+			FMP_INFO.Cumulative_TwentyFive_percent_Reward_plus_1_180_locked_Reward = Prev_day_twentyFive_percent_Reward + (1.0/180.0)*Prev_day_seventyFive_percent_Locked_Reward
+			FMP_INFO.Daily_TwentyFive_percent_Reward_for_inv = 0.0
+			FMP_INFO.Cumulative_TwentyFive_percent_Reward_for_Inv = Prev_day_Cumulative_twentyFive_percent_Reward_for_inv
+			FMP_INFO.Daily_Seventy_five_percent_locked_reward_for_inv = 0.0
+			FMP_INFO.Cumulative_Seventy_five_percent_locked_reward_for_inv = Prev_day_Cumulative_Seventy_five_percent_locked_reward_for_inv * (1.0 - 1.0/180.0)
+			FMP_INFO.Daily_Release_of_1__180_of_locked_Reward_for_inv = (1.0 / 180.0) * Prev_day_Cumulative_Seventy_five_percent_locked_reward_for_inv
+			FMP_INFO.Cumulative_Release_of_1__180_of_locked_Reward_for_inv = Prev_day_Cumulative_Release_of_1__180_of_locked_Reward_for_inv + FMP_INFO.Daily_Release_1_180_of_SeventyFive_percent_Reward
+			FMP_INFO.Daily_Staking_of_inv = FMP_INFO.Daily_Release_of_1__180_of_locked_Reward_for_inv
+			FMP_INFO.Cumulative_Total_staking_of_inv = Prev_day_Cumulative_Total_staking_of_inv + FMP_INFO.Daily_Staking_of_inv
+			FMP_INFO.Vogo_75_percent_Reward = FMP_INFO.Cumulative_SeventyFive_percent_Locked_Reward_minus_1_180_locked_Reward - FMP_INFO.Cumulative_Seventy_five_percent_locked_reward_for_inv
+			FMP_INFO.Vogo_25_percent_Reward = FMP_INFO.Cumulative_TwentyFive_percent_Reward_plus_1_180_locked_Reward - (FMP_INFO.Cumulative_Total_staking_of_inv - FMP_INFO.Cumulative_TwentyFive_percent_Reward_for_Inv)
+			FMP_INFO.Total_Fil_rewards_for_Inv_on_daily_basis = 0.0
+			FMP_INFO.Frp_Cumulative_Fil_Sum_for_Inv = Prev_day_Frp_Cumulative_Fil_Sum_for_Inv
+			if date_today == 26 {
+				FMP_INFO.FRP_Adj_Power_for_inv = Prev_day_FRP_Adj_Power_for_inv + (FMP_INFO.Cumulative_Total_staking_of_inv / (float32(Current_Sector_Initial_Pledge_32GB) * 32.0) / 1000.0)
+			}
+			FMP_INFO.FRP_Adj_Power_for_inv = Prev_day_FRP_Adj_Power_for_inv
+
+		}
+		FMP_INFO.Fil_rewards_Daily_basis = Total_FiL_Reward_Vogo
+		FMP_INFO.Cumulative_fil_Reward = Prev_day_Cumulative_fil_Reward + FMP_INFO.Fil_rewards_Daily_basis
+		FMP_INFO.Daily_TwentyFive_percent_Reward = (25.0 / 100.0) * Total_FiL_Reward_Vogo
+		FMP_INFO.Daily_SeventyFive_percent_Locked_Reward = (75.0 / 100.0) * Total_FiL_Reward_Vogo
+		FMP_INFO.Cumulative_SeventyFive_percent_Locked_Reward_minus_1_180_locked_Reward = FMP_INFO.Daily_SeventyFive_percent_Locked_Reward + (Prev_day_seventyFive_percent_Locked_Reward)*(1.0-1.0/180)
+		FMP_INFO.Cumulative_TwentyFive_percent_Reward_plus_1_180_locked_Reward = FMP_INFO.Daily_TwentyFive_percent_Reward + Prev_day_twentyFive_percent_Reward + (1.0/180.0)*Prev_day_seventyFive_percent_Locked_Reward
+		FMP_INFO.Daily_TwentyFive_percent_Reward_for_inv = float32(Total_Quality_adjP_on_daily_basis_for_Inv) / float32(Total_Quality_adjP_on_daily_basis_for_Vogo) * FMP_INFO.Daily_TwentyFive_percent_Reward
+		FMP_INFO.Cumulative_TwentyFive_percent_Reward_for_Inv = Prev_day_Cumulative_twentyFive_percent_Reward_for_inv + FMP_INFO.Daily_TwentyFive_percent_Reward_for_inv
+		FMP_INFO.Daily_Seventy_five_percent_locked_reward_for_inv = (float32(Total_Quality_adjP_on_daily_basis_for_Inv) / float32(Total_Quality_adjP_on_daily_basis_for_Vogo)) * FMP_INFO.Daily_SeventyFive_percent_Locked_Reward
+		FMP_INFO.Cumulative_Seventy_five_percent_locked_reward_for_inv = FMP_INFO.Daily_Seventy_five_percent_locked_reward_for_inv + (1.0-1.0/180)*Prev_day_Cumulative_Seventy_five_percent_locked_reward_for_inv
 		FMP_INFO.Daily_Release_of_1__180_of_locked_Reward_for_inv = (1.0 / 180.0) * Prev_day_Cumulative_Seventy_five_percent_locked_reward_for_inv
 		FMP_INFO.Cumulative_Release_of_1__180_of_locked_Reward_for_inv = Prev_day_Cumulative_Release_of_1__180_of_locked_Reward_for_inv + FMP_INFO.Daily_Release_1_180_of_SeventyFive_percent_Reward
-		FMP_INFO.Daily_Staking_of_inv = FMP_INFO.Daily_Release_of_1__180_of_locked_Reward_for_inv
+		FMP_INFO.Daily_Staking_of_inv = FMP_INFO.Daily_TwentyFive_percent_Reward_for_inv + FMP_INFO.Daily_Release_1_180_of_SeventyFive_percent_Reward
 		FMP_INFO.Cumulative_Total_staking_of_inv = Prev_day_Cumulative_Total_staking_of_inv + FMP_INFO.Daily_Staking_of_inv
 		FMP_INFO.Vogo_75_percent_Reward = FMP_INFO.Cumulative_SeventyFive_percent_Locked_Reward_minus_1_180_locked_Reward - FMP_INFO.Cumulative_Seventy_five_percent_locked_reward_for_inv
 		FMP_INFO.Vogo_25_percent_Reward = FMP_INFO.Cumulative_TwentyFive_percent_Reward_plus_1_180_locked_Reward - (FMP_INFO.Cumulative_Total_staking_of_inv - FMP_INFO.Cumulative_TwentyFive_percent_Reward_for_Inv)
+		FMP_INFO.Total_Fil_rewards_for_Inv_on_daily_basis = FMP_INFO.Daily_TwentyFive_percent_Reward_for_inv + FMP_INFO.Daily_Seventy_five_percent_locked_reward_for_inv
+
+		if date_today == 26 {
+			FMP_INFO.FRP_Adj_Power_for_inv = Prev_day_FRP_Adj_Power_for_inv + (FMP_INFO.Cumulative_Total_staking_of_inv / (float32(Current_Sector_Initial_Pledge_32GB) * 32.0) / 1000.0)
+		}
+		FMP_INFO.FRP_Adj_Power_for_inv = Prev_day_FRP_Adj_Power_for_inv
 	}
-	FMP_INFO.Fil_rewards_Daily_basis = Total_FiL_Reward_Vogo
-	FMP_INFO.Cumulative_fil_Reward = Prev_day_Cumulative_fil_Reward + FMP_INFO.Fil_rewards_Daily_basis
-	FMP_INFO.Daily_TwentyFive_percent_Reward = (25.0 / 100.0) * Total_FiL_Reward_Vogo
-	FMP_INFO.Daily_SeventyFive_percent_Locked_Reward = (75.0 / 100.0) * Total_FiL_Reward_Vogo
-	FMP_INFO.Cumulative_SeventyFive_percent_Locked_Reward_minus_1_180_locked_Reward = FMP_INFO.Daily_SeventyFive_percent_Locked_Reward + (Prev_day_seventyFive_percent_Locked_Reward)*(1.0-1.0/180)
-	FMP_INFO.Cumulative_TwentyFive_percent_Reward_plus_1_180_locked_Reward = FMP_INFO.Daily_TwentyFive_percent_Reward + Prev_day_twentyFive_percent_Reward + (1.0/180.0)*Prev_day_seventyFive_percent_Locked_Reward
-	FMP_INFO.Daily_TwentyFive_percent_Reward_for_inv = float32(Total_Quality_adjP_on_daily_basis_for_Inv) / float32(Total_Quality_adjP_on_daily_basis_for_Vogo) * FMP_INFO.Daily_TwentyFive_percent_Reward
-	FMP_INFO.Cumulative_TwentyFive_percent_Reward_for_Inv = Prev_day_Cumulative_twentyFive_percent_Reward_for_inv + FMP_INFO.Daily_TwentyFive_percent_Reward_for_inv
-	FMP_INFO.Daily_Seventy_five_percent_locked_reward_for_inv = (float32(Total_Quality_adjP_on_daily_basis_for_Inv) / float32(Total_Quality_adjP_on_daily_basis_for_Vogo)) * FMP_INFO.Daily_SeventyFive_percent_Locked_Reward
-	FMP_INFO.Cumulative_Seventy_five_percent_locked_reward_for_inv = FMP_INFO.Daily_Seventy_five_percent_locked_reward_for_inv + (1.0-1.0/180)*Prev_day_Cumulative_Seventy_five_percent_locked_reward_for_inv
-	FMP_INFO.Daily_Release_of_1__180_of_locked_Reward_for_inv = (1.0 / 180.0) * Prev_day_Cumulative_Seventy_five_percent_locked_reward_for_inv
-	FMP_INFO.Cumulative_Release_of_1__180_of_locked_Reward_for_inv = Prev_day_Cumulative_Release_of_1__180_of_locked_Reward_for_inv + FMP_INFO.Daily_Release_1_180_of_SeventyFive_percent_Reward
-	FMP_INFO.Daily_Staking_of_inv = FMP_INFO.Daily_TwentyFive_percent_Reward_for_inv + FMP_INFO.Daily_Release_1_180_of_SeventyFive_percent_Reward
-	FMP_INFO.Cumulative_Total_staking_of_inv = Prev_day_Cumulative_Total_staking_of_inv + FMP_INFO.Daily_Staking_of_inv
-	FMP_INFO.Vogo_75_percent_Reward = FMP_INFO.Cumulative_SeventyFive_percent_Locked_Reward_minus_1_180_locked_Reward - FMP_INFO.Cumulative_Seventy_five_percent_locked_reward_for_inv
-	FMP_INFO.Vogo_25_percent_Reward = FMP_INFO.Cumulative_TwentyFive_percent_Reward_plus_1_180_locked_Reward - (FMP_INFO.Cumulative_Total_staking_of_inv - FMP_INFO.Cumulative_TwentyFive_percent_Reward_for_Inv)
+	FMP_INFO = prev_fmp_info
+	FMP_INFO.graduation_messages_for_inv = "YOU ARE GRADUATED FROM INVESTMENT"
 
 	db.Create(&FMP_INFO)
 }
@@ -612,15 +639,15 @@ type Node_Info_Daily_and_FIl_Price_ struct {
 	Date                                     string
 	Fil_Price                                float32
 	Current_Sector_Initial_Pledge_32GB       float32
-	Fil_Rewards_f01624021_node_1             int64
-	Fil_Rewards_f01918123_node_2             int64
-	Fil_Rewards_f01987994_node_3             int64
-	Cummulative_Fil_Rewards_f01624021_node_1 int64
-	Cummulative_Fil_Rewards_f01918123_node_2 int64
-	Cummulative_Fil_Rewards_f01987994_node_3 int64
-	FRP_f01624021_node_1_adjP                int64
-	FRP_f01918123_node_2_adjP                int64
-	FRP_f01987994_node_3_adjP                int64
+	Fil_Rewards_f01624021_node_1             float32
+	Fil_Rewards_f01918123_node_2             float32
+	Fil_Rewards_f01987994_node_3             float32
+	Cummulative_Fil_Rewards_f01624021_node_1 float32
+	Cummulative_Fil_Rewards_f01918123_node_2 float32
+	Cummulative_Fil_Rewards_f01987994_node_3 float32
+	FRP_f01624021_node_1_adjP                float32
+	FRP_f01918123_node_2_adjP                float32
+	FRP_f01987994_node_3_adjP                float32
 }
 
 func DbConnect() *gorm.DB {
