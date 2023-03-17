@@ -554,6 +554,12 @@ type FMP_Info_for_investor_updates struct {
 	FRP_Adj_Power_for_inv                                                  float32
 	Total_Fil_rewards_for_Inv_on_daily_basis                               float32
 	Frp_Cumulative_Fil_Sum_for_Inv                                         float32
+	Daily_twenty_five_percent_Reward_for_KSL_P1                            float32
+	Daily_seventy_five_percent_Reward_for_KSL_P1                           float32
+	Cumulative_TwentyFive_percent_Reward_for_KSL_P1                        float32
+	Cumulative_Seventy_five_percent_Reward_for_KSL_P1                      float32
+	Daily_One_Eighty_Release_for_KSL_P1                                    float32
+	Cumulative_of_Daily_One_Eighty_Release_for_KSL_P1                      float32
 	graduation_messages_for_inv                                            string
 }
 
@@ -578,6 +584,10 @@ func Calculate_KSL_FRP_500() {
 	Prev_day_Cumulative_Total_staking_of_inv := prev_fmp_info.Cumulative_Total_staking_of_inv
 	Prev_day_FRP_Adj_Power_for_inv := prev_fmp_info.FRP_Adj_Power_for_inv
 	Prev_day_Frp_Cumulative_Fil_Sum_for_Inv := prev_fmp_info.Frp_Cumulative_Fil_Sum_for_Inv
+	Prev_day_Cumulative_TwentyFive_percent_Reward_for_KSL_P1 := prev_fmp_info.Cumulative_TwentyFive_percent_Reward_for_KSL_P1
+	Prev_day_Cumulative_Seventy_five_percent_Reward_for_KSL_P1 := prev_fmp_info.Cumulative_Seventy_five_percent_Reward_for_KSL_P1
+	Prev_day_Cumulative_of_Daily_One_Eighty_Release_for_KSL_P1 := prev_fmp_info.Cumulative_of_Daily_One_Eighty_Release_for_KSL_P1
+
 	Current_Sector_Initial_Pledge_32GB := 0.2015
 	FMP_INFO.Date = Date
 	// Querry the FMP_Info_for_investor_updates for previous FMP_Info_for_investor_
@@ -601,6 +611,13 @@ func Calculate_KSL_FRP_500() {
 			FMP_INFO.Vogo_75_percent_Reward = FMP_INFO.Cumulative_SeventyFive_percent_Locked_Reward_minus_1_180_locked_Reward - FMP_INFO.Cumulative_Seventy_five_percent_locked_reward_for_inv
 			FMP_INFO.Vogo_25_percent_Reward = FMP_INFO.Cumulative_TwentyFive_percent_Reward_plus_1_180_locked_Reward - FMP_INFO.Cumulative_TwentyFive_percent_Reward_for_Inv - FMP_INFO.Cumulative_Release_of_1__180_of_locked_Reward_for_inv
 			FMP_INFO.Total_Fil_rewards_for_Inv_on_daily_basis = 0.0
+			FMP_INFO.Daily_twenty_five_percent_Reward_for_KSL_P1 = 0.0
+			FMP_INFO.Daily_seventy_five_percent_Reward_for_KSL_P1 = 0.0
+			FMP_INFO.Cumulative_TwentyFive_percent_Reward_for_KSL_P1 = Prev_day_Cumulative_TwentyFive_percent_Reward_for_KSL_P1
+			FMP_INFO.Cumulative_Seventy_five_percent_Reward_for_KSL_P1 = (1.0 - 1.0/180.0) * Prev_day_Cumulative_Seventy_five_percent_Reward_for_KSL_P1
+			FMP_INFO.Daily_One_Eighty_Release_for_KSL_P1 = (1.0 / 180.0) * Prev_day_Cumulative_Seventy_five_percent_Reward_for_KSL_P1
+			FMP_INFO.Cumulative_of_Daily_One_Eighty_Release_for_KSL_P1 = Prev_day_Cumulative_of_Daily_One_Eighty_Release_for_KSL_P1 + FMP_INFO.Daily_One_Eighty_Release_for_KSL_P1
+
 			FMP_INFO.Frp_Cumulative_Fil_Sum_for_Inv = Prev_day_Frp_Cumulative_Fil_Sum_for_Inv
 			if date_today == 26 {
 				FMP_INFO.FRP_Adj_Power_for_inv = Prev_day_FRP_Adj_Power_for_inv + (FMP_INFO.Cumulative_Total_staking_of_inv / (float32(Current_Sector_Initial_Pledge_32GB) * 32.0) / 1000.0)
@@ -625,7 +642,12 @@ func Calculate_KSL_FRP_500() {
 		FMP_INFO.Vogo_75_percent_Reward = FMP_INFO.Cumulative_SeventyFive_percent_Locked_Reward_minus_1_180_locked_Reward - FMP_INFO.Cumulative_Seventy_five_percent_locked_reward_for_inv
 		FMP_INFO.Vogo_25_percent_Reward = FMP_INFO.Cumulative_TwentyFive_percent_Reward_plus_1_180_locked_Reward - FMP_INFO.Cumulative_TwentyFive_percent_Reward_for_Inv - FMP_INFO.Cumulative_Release_of_1__180_of_locked_Reward_for_inv
 		FMP_INFO.Total_Fil_rewards_for_Inv_on_daily_basis = FMP_INFO.Daily_TwentyFive_percent_Reward_for_inv + FMP_INFO.Daily_Seventy_five_percent_locked_reward_for_inv
-
+		FMP_INFO.Daily_twenty_five_percent_Reward_for_KSL_P1 = 0.3 * FMP_INFO.Daily_TwentyFive_percent_Reward_for_inv * (1143.0 / float32(Total_Quality_adjP_on_daily_basis_for_Vogo))
+		FMP_INFO.Daily_seventy_five_percent_Reward_for_KSL_P1 = 0.3 * FMP_INFO.Daily_SeventyFive_percent_Locked_Reward * (1143.0 / float32(Total_Quality_adjP_on_daily_basis_for_Vogo))
+		FMP_INFO.Cumulative_TwentyFive_percent_Reward_for_KSL_P1 = Prev_day_Cumulative_TwentyFive_percent_Reward_for_KSL_P1 + FMP_INFO.Daily_twenty_five_percent_Reward_for_KSL_P1
+		FMP_INFO.Cumulative_Seventy_five_percent_Reward_for_KSL_P1 = FMP_INFO.Daily_seventy_five_percent_Reward_for_KSL_P1 + (1.0-1.0/180.0)*Prev_day_Cumulative_Seventy_five_percent_Reward_for_KSL_P1
+		FMP_INFO.Daily_One_Eighty_Release_for_KSL_P1 = (1.0 / 180.0) * Prev_day_Cumulative_Seventy_five_percent_Reward_for_KSL_P1
+		FMP_INFO.Cumulative_of_Daily_One_Eighty_Release_for_KSL_P1 = Prev_day_Cumulative_of_Daily_One_Eighty_Release_for_KSL_P1 + FMP_INFO.Daily_One_Eighty_Release_for_KSL_P1
 		if date_today == 26 {
 			FMP_INFO.FRP_Adj_Power_for_inv = Prev_day_FRP_Adj_Power_for_inv + (FMP_INFO.Cumulative_Total_staking_of_inv / (float32(Current_Sector_Initial_Pledge_32GB) * 32.0) / 1000.0)
 		}
@@ -637,8 +659,16 @@ func Calculate_KSL_FRP_500() {
 	db.Create(&FMP_INFO)
 }
 
-// struct to get data base from the database where data were stored from the api call.
+type KSL_P100000 struct {
+	Daily_twenty_five_percent_Reward_for_KSL_P1       float32
+	Daily_seventy_five_percent_Reward_for_KSL_P1      float32
+	Cumulative_TwentyFive_percent_Reward_for_KSL_P1   float32
+	Cumulative_Seventy_five_percent_Reward_for_KSL_P1 float32
+	Daily_One_Eighty_Release_for_KSL_P1               float32
+	Cumulative_of_Daily_One_Eighty_Release_for_KSL_P1 float32
+}
 
+// struct to get data base from the database where data were stored from the api call.
 type Node_Info_Daily_and_FIl_Price_ struct {
 	Date                                     string
 	Fil_Price                                float32
