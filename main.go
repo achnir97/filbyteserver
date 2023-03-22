@@ -13,6 +13,7 @@ type Total_Quality_adjP_and_Fil_Reward_for_Vogo_network struct {
 	Total_Quality_adjP_For_Vogo_Daily_Basis float32
 	Total_FIL_Reward_Vogo_daily_Basis       float32
 	Current_Sector_Initial_Pledge_32GB      float32
+	Fil_Price                               float32
 }
 
 //var hasRunToday bool
@@ -25,15 +26,26 @@ func main() {
 	// }
 	// fmt.Println(prev_info)
 
-	api.KSP_FRP_INFO()
-
+	//api.KSP_FRP_INFO()
+	//
 	// api.Calculate_total_FIl_reward_and_total_quality_adj_P_and_Fil_Reward_for_Vogo()
 	// //api.KSP_FRP_INFO()
 
-	// db, err := api.DbConnect()
+	db, err := api.DbConnect()
+	if err != nil {
+		panic(err)
+	}
+	// data := db.Exec("ALTER TABLE Info_For_KSL_FRP_500_and_KSL_100000  ADD COLUMN Daily_Fil_paid_to_inv FLOAT(32), ADD COLUMN Cumulative_Daily_Fil_paid_to_inv FLOAT(32), ADD COLUMN Value_of_FIL_Paid_to_inv FLOAT(32), ADD COLUMN Value_of_Total_fil_paid_to_inv  FLOAT(32)")
 	// if err != nil {
-	// 	panic(err)
+	// 	fmt.Println("Error adding columns:", err)
 	// }
+	// log.Println(data)
+
+	//data2 := db.Exec("UPDATE total_quality_adjp_and_fil_reward_for_vogo_networks SET fil_price = node_info_daily_adjp_and_f_il_prices.fil_price FROM node_info_daily_adjp_and_f_il_prices WHERE total_quality_adjp_and_fil_reward_for_vogo_networks.date= node_info_daily_adjp_and_f_il_prices.date")
+	//if err != nil {
+	//	panic(err)
+	//	}
+	//	log.Println(data2)
 	// if db.Migrator().HasTable(&api.Total_Quality_adjP_and_Fil_Reward_for_Vogo_network{}) {
 	// 	if err := db.Migrator().DropTable(&api.Total_Quality_adjP_and_Fil_Reward_for_Vogo_network{}); err != nil {
 	// 		panic("Failed to drop table!")
