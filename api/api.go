@@ -135,7 +135,7 @@ type Node_Info_Daily_and_FIl_Price_ struct {
 }
 
 type Info_For_KSL_FRP_500_and_KSL_100000 struct {
-	Date                                                           string  `json:"column:Date"`
+	Date                                                           string  `json:"Date"`
 	Total_Quality_adjP_For_Vogo_Daily_Basis                        float32 `json:"total_Quality_adjP_For_Vogo_Daily_Basis"`
 	Fil_rewards_Daily_basis                                        float32 `json:"fil_rewards_Daily_basis"`
 	Daily_TwentyFive_percent_Reward                                float32 `json:"daily_TwentyFive_percent_Reward"`
@@ -203,11 +203,11 @@ type FMP_Info_for_investor struct {
 	Value_of_Total_FIl_Paid                   float32 `json:"value_of_Total_FIl_Paid"`
 }
 type Total_Quality_adjP_and_Fil_Reward_for_Vogo_network struct {
-	Date                                    string
-	Total_Quality_adjP_For_Vogo_Daily_Basis float32
-	Total_FIL_Reward_Vogo_daily_Basis       float32
-	Current_Sector_Initial_Pledge_32GB      float32
-	Fil_price                               float32
+	Date                                    string  `json:"date"`
+	Total_Quality_adjP_For_Vogo_Daily_Basis float32 `json:"total_Quality_adjP_For_Vogo_Daily_basis"`
+	Total_FIL_Reward_Vogo_daily_Basis       float32 `json:"total_FIL_Reward_Vogo_daily_Basis"`
+	Current_Sector_Initial_Pledge_32GB      float32 `json:"current_Sector_Initial_Pledge_32GB"`
+	Fil_price                               float32 `json:"fil_price"`
 }
 
 // func (Node_Info_Daily_and_FIl_Price *Node_Info_Daily_and_FIl_Price) BeforeCreate(*gorm.DB) error {
@@ -268,7 +268,7 @@ func FIL_Price_n_Block_rewards_for_Each_Node_from_API() {
 
 		var Cummulative_Fil_Rewards_f01624021_node_1 float32
 
-		query := "SELECT cummulative_fil_rewards_f01624021_node_1 FROM node_info_daily_and_f_il_prices ORDER BY id DESC LIMIT 1"
+		query := "SELECT cummulative_fil_rewards_f01624021_node_1 FROM node_info_daily_and_f_il_prices ORDER BY date DESC LIMIT 1"
 
 		err = db.Raw(query).Scan(&Cummulative_Fil_Rewards_f01624021_node_1).Error
 		if err != nil {
@@ -334,7 +334,7 @@ func FIL_Price_n_Block_rewards_for_Each_Node_from_API() {
 		defer wg.Done()
 		var Cummulative_Fil_Rewards_f01918123_node_2 float32
 
-		query := "SELECT Cummulative_Fil_Rewards_f01918123_node_2 FROM node_info_daily_and_f_il_prices ORDER BY id DESC LIMIT 1"
+		query := "SELECT Cummulative_Fil_Rewards_f01918123_node_2 FROM node_info_daily_and_f_il_prices ORDER BY date DESC LIMIT 1"
 
 		err = db.Raw(query).Scan(&Cummulative_Fil_Rewards_f01918123_node_2).Error
 
@@ -395,7 +395,7 @@ func FIL_Price_n_Block_rewards_for_Each_Node_from_API() {
 		FIL_REWARDS_f01987994_node_3 = float32(Miner_Info_f01987994.Miner.BlocksMined)
 		var Cummulative_Fil_Rewards_f01987994_node_3 float32
 
-		query := "SELECT Cummulative_Fil_Rewards_f01987994_node_3 FROM node_info_daily_and_f_il_prices ORDER BY id DESC LIMIT 1"
+		query := "SELECT Cummulative_Fil_Rewards_f01987994_node_3 FROM node_info_daily_and_f_il_prices ORDER BY date DESC LIMIT 1"
 
 		err = db.Raw(query).Scan(&Cummulative_Fil_Rewards_f01987994_node_3).Error
 		if err != nil {
@@ -442,6 +442,7 @@ func FIL_Price_n_Block_rewards_for_Each_Node_from_API() {
 	Node_info := <-c
 	fmt.Printf("The node infos are %v\n", Node_info)
 	Node_Info_Daily_and_FIl_Price := Node_Info_Daily_AdjP_and_FIl_Price{}
+	Node_Info_Daily_and_FIl_Price.Date = time.Now().Format("2006-01-02")
 	Node_Info_Daily_and_FIl_Price.Fil_Price = Node_info.Fil_Price
 	Node_Info_Daily_and_FIl_Price.Fil_Rewards_f01624021_node_1 = Node_info.Fil_Rewards_f01624021_node_1
 	Node_Info_Daily_and_FIl_Price.Fil_Rewards_f01918123_node_2 = Node_info.Fil_Rewards_f01918123_node_2
@@ -713,7 +714,7 @@ func Query_total_Quality_and_Fil_reward() (Total_Quality_adjP_and_Fil_Reward_for
 		fmt.Println(err)
 	}
 	var Quality_adj_fil_reward Total_Quality_adjP_and_Fil_Reward_for_Vogo_network
-	query := "SELECT * FROM node_info_daily_adjp_and_f_il_prices order by date desc limit 1 offset 1;"
+	query := "SELECT * FROM node_info_daily_adjp_and_f_il_prices order by date desc limit 1;"
 	db.Raw(query).Scan(&Quality_adj_fil_reward)
 	fmt.Println(Quality_adj_fil_reward)
 	return Quality_adj_fil_reward, nil
@@ -754,7 +755,7 @@ func KSP_FRP_INFO() {
 	if err != nil {
 		fmt.Println(err.Error())
 	}
-	query := "SELECT * FROM  total_quality_adjp_and_fil_reward_for_vogo_networks  order by date asc  offset 4 "
+	query := "SELECT * FROM  total_quality_adjp_and_fil_reward_for_vogo_networks where date>='2023-03-18' order by date asc"
 	total_Quality_adjP_on_daily_basis_for_Vogo := Total_Quality_adjP_and_Fil_Reward_for_Vogo_network{}
 	rows, err := db.Raw(query).Rows()
 	if err != nil {
@@ -777,7 +778,7 @@ func KSP_FRP_INFO() {
 		Total_FiL_Reward_Vogo := total_Quality_adjP_on_daily_basis_for_Vogo.Total_FIL_Reward_Vogo_daily_Basis
 		Total_Quality_adjP_For_Vogo_Daily_Basis := total_Quality_adjP_on_daily_basis_for_Vogo.Total_Quality_adjP_For_Vogo_Daily_Basis
 		fil_price := float32(total_Quality_adjP_on_daily_basis_for_Vogo.Fil_price)
-		//fmt.Printf("total_Quality_adjP_on_daily_basis_for_Vogo %f\n", Total_Quality_adjP_For_Vogo_Daily_Basis)
+		fmt.Printf("total_Quality_adjP_on_daily_basis_for_Vogo %f\n", Total_Quality_adjP_For_Vogo_Daily_Basis)
 		//fmt.Printf("Total_fil_rewards are %f\n", Total_FiL_Reward_Vogo)
 		//fmt.Println(prev_fmp_info)
 		//date_today := time.Now().Day()
@@ -814,203 +815,264 @@ func KSP_FRP_INFO() {
 		//fmt.Printf("Prev_day_Cumulative_Seventy_five_percent_Reward_for_KSL_P1 is %f\n", Prev_day_Cumulative_Seventy_five_percent_Reward_for_KSL_P1)
 		Prev_day_Cumulative_of_Daily_One_Eighty_Release_for_KSL_P1 := prev_fmp_info.Cumulative_of_Daily_One_Eighty_Release_for_KSL_P1
 		//fmt.Println("Prev_day_Cumulative_SeventyFive_percent_Locked_Reward_minus_1_180_locked_Reward ", Prev_day_Cumulative_SeventyFive_percent_Locked_Reward_minus_1_180_locked_Reward)
-		Prev_day_Cumulative_Total_FIl_Reward_KSL_P1 := prev_fmp_info.Cumulative_Total_Fil_Reward_KSL_P1
-
+		Prev_day_Cumulative_Total_FIl_Reward_KSL_P1 := float32(prev_fmp_info.Cumulative_Total_Fil_Reward_KSL_P1)
+		//fmt.Printf("Prev_day_Cumulative_Total_Fil_Reward_KSL_P1 is %f\n", Prev_day_Cumulative_Total_FIl_Reward_KSL_P1)
+		Prev_day_Cumulative_Daily_Fil_paid_to_inv := prev_fmp_info.Cumulative_Daily_Fil_paid_to_inv
+		//fmt.Printf("Prev_day_Cumulative_Daily_Fil_paid_to_inv is %f\n", Prev_day_Cumulative_Daily_Fil_paid_to_inv)
 		Prev_day_Cumulative_One_eighty_reward_paid_for_KSL_P1 := prev_fmp_info.Cumulative_One_eighty_reward_paid_for_KSL_P1
-
+		//fmt.Printf("Prev_day_Cumulative_One_eighty_reward_paid_for_KSL_P1 is %f\n", Prev_day_Cumulative_One_eighty_reward_paid_for_KSL_P1)
+		Prev_day_Value_of_Total_fil_paid_to_inv := prev_fmp_info.Value_of_Total_fil_paid_to_inv
+		//fmt.Printf("Prev_day_Value_of_Total_fil_paid_to_inv is %f\n", Prev_day_Value_of_Total_fil_paid_to_inv)
 		Prev_day_Cumulative_twenty_five_percent_reward_paid_for_KSL_P1 := prev_fmp_info.Cumulative_twenty_five_percent_reward_paid_for_KSL_P1
-
+		//fmt.Printf("Prev_day_Cumulative_twenty_five_percent_reward_paid_for_KSL_P1 is %f\n", Prev_day_Cumulative_twenty_five_percent_reward_paid_for_KSL_P1)
 		// query the Current Sector initail Pledge information
 		Current_Sector_Initial_Pledge_32GB := total_Quality_adjP_on_daily_basis_for_Vogo.Current_Sector_Initial_Pledge_32GB
 
 		FMP_INFO.Date = Date
 		// Querry the FMP_Info_for_investor_updates for previous FMP_Info_for_investor_
-		if prev_fmp_info.FRP_Adj_Power_for_inv < 1500.0 {
-			FMP_INFO.Daily_Fil_paid_to_inv = 0
-			FMP_INFO.Cumulative_Daily_Fil_paid_to_inv = 0
-			FMP_INFO.Value_of_FIL_Paid_to_inv = 0
-			FMP_INFO.Value_of_Total_fil_paid_to_inv = 0
-			FMP_INFO.Graduation_messages_for_inv = "YOU  ARE  STILL YET TO GRADAUTE"
-			if Total_FiL_Reward_Vogo == 0 {
-				FMP_INFO.Total_Quality_adjP_For_Vogo_Daily_Basis = Total_Quality_adjP_For_Vogo_Daily_Basis
-				FMP_INFO.Fil_rewards_Daily_basis = 0
-				FMP_INFO.Cumulative_fil_Reward = Prev_day_Cumulative_fil_Reward
 
-				FMP_INFO.Daily_TwentyFive_percent_Reward = 0.0
+		if Total_FiL_Reward_Vogo == 0 {
+			FMP_INFO.Total_Quality_adjP_For_Vogo_Daily_Basis = Total_Quality_adjP_For_Vogo_Daily_Basis
+			//fmt.Printf("FMP_INFO.Total_Quality_adjP_For_Vogo_Daily_Basis %f\n", FMP_INFO.Total_Quality_adjP_For_Vogo_Daily_Basis)
+			FMP_INFO.Fil_rewards_Daily_basis = 0
+			//fmt.Printf("FMP_INFO.Fil_rewards_Daily_basis %f\n", FMP_INFO.Fil_rewards_Daily_basis)
+			FMP_INFO.Cumulative_fil_Reward = Prev_day_Cumulative_fil_Reward
+			//fmt.Printf("FMP_INFO.Cumulative_fil_Reward %f\n", FMP_INFO.Cumulative_fil_Reward)
+			FMP_INFO.Daily_TwentyFive_percent_Reward = 0.0
+			//fmt.Printf("FMP_INFO.Daily_TwentyFive_percent_Reward %f\n", FMP_INFO.Daily_TwentyFive_percent_Reward)
+			FMP_INFO.Daily_SeventyFive_percent_Locked_Reward = 0.0
+			//fmt.Printf("FMP_INFO.Daily_SeventyFive_percent_Locked %f\n", FMP_INFO.Daily_SeventyFive_percent_Locked_Reward)
 
-				FMP_INFO.Daily_SeventyFive_percent_Locked_Reward = 0.0
+			FMP_INFO.Daily_Release_1_180_of_SeventyFive_percent_Reward = float32(1.0/180.0) * Prev_day_Cumulative_SeventyFive_percent_Locked_Reward_minus_1_180_locked_Reward
+			//fmt.Printf("FMP_INFO.Daily_Release_1_180_of_SeventyFive_percent_Reward %f\n", FMP_INFO.Daily_Release_1_180_of_SeventyFive_percent_Reward)
 
-				FMP_INFO.Daily_Release_1_180_of_SeventyFive_percent_Reward = float32(1.0/180.0) * Prev_day_Cumulative_SeventyFive_percent_Locked_Reward_minus_1_180_locked_Reward
+			FMP_INFO.Cumulative_SeventyFive_percent_Locked_Reward_minus_1_180_locke = Prev_day_Cumulative_SeventyFive_percent_Locked_Reward_minus_1_180_locked_Reward * float32(1.0-1.0/180.0)
+			//fmt.Printf("FMP_INFO.Cumulative_SeventyFive_percent_Locked_Reward_minus_1_180_locke %f\n", FMP_INFO.Cumulative_SeventyFive_percent_Locked_Reward_minus_1_180_locke)
+			FMP_INFO.Cumulative_TwentyFive_percent_Reward_plus_1_180_locked_Reward = Prev_day_Cumulative_TwentyFive_percent_Reward_plus_1_180_locked_Reward + float32(1.0/180.0)*Prev_day_Cumulative_SeventyFive_percent_Locked_Reward_minus_1_180_locked_Reward
+			//fmt.Printf("FMP_INFO.Cumulative_TwentyFive_percent_Reward_plus_1_180_locked_Reward %f\n", FMP_INFO.Cumulative_TwentyFive_percent_Reward_plus_1_180_locked_Reward)
+			FMP_INFO.Daily_TwentyFive_percent_Reward_for_inv = 0.0
+			//fmt.Printf("FMP_INFO.Daily_TwentyFive_percent_Reward_for_inv %f\n", FMP_INFO.Daily_TwentyFive_percent_Reward_for_inv)
+			FMP_INFO.Cumulative_TwentyFive_percent_Reward_for_Inv = Prev_day_Cumulative_twentyFive_percent_Reward_for_inv
+			//fmt.Printf("FMP_INFO.Cumulative_TwentyFive_percent_Reward_for_Inv %f\n", FMP_INFO.Cumulative_TwentyFive_percent_Reward_for_Inv)
+			FMP_INFO.Daily_Seventy_five_percent_locked_reward_for_inv = 0.0
+			//fmt.Printf("FMP_INFO.Daily_Seventy_five_percent_locked_reward_for_inv  %f\n", FMP_INFO.Daily_Seventy_five_percent_locked_reward_for_inv)
+			FMP_INFO.Cumulative_Seventy_five_percent_locked_reward_for_inv = Prev_day_Cumulative_Seventy_five_percent_locked_reward_for_inv * float32(1.0-1.0/180.0)
+			//fmt.Printf("FMP_INFO.Cumulative_Seventy_five_percent_locked_reward_for_inv   %f\n", FMP_INFO.Cumulative_Seventy_five_percent_locked_reward_for_inv)
+			FMP_INFO.Daily_Release_of_1__180_of_locked_Reward_for_inv = float32(1.0/180.0) * Prev_day_Cumulative_Seventy_five_percent_locked_reward_for_inv
+			//fmt.Printf("FMP_INFO.Daily_Release_of_1__180_of_locked_Reward_for_inv  %f\n", FMP_INFO.Daily_Release_of_1__180_of_locked_Reward_for_inv)
+			FMP_INFO.Cumulative_Release_of_1__180_of_locked_Reward_for_inv = Prev_day_Cumulative_Release_of_1__180_of_locked_Reward_for_inv + FMP_INFO.Daily_Release_of_1__180_of_locked_Reward_for_inv
+			//fmt.Printf("FMP_INFO.Cumulative_Release_of_1__180_of_locked_Reward_for_inv  %f\n", FMP_INFO.Cumulative_Release_of_1__180_of_locked_Reward_for_inv)
 
-				FMP_INFO.Cumulative_SeventyFive_percent_Locked_Reward_minus_1_180_locke = Prev_day_Cumulative_SeventyFive_percent_Locked_Reward_minus_1_180_locked_Reward * float32(1.0-1.0/180.0)
+			FMP_INFO.Total_Fil_rewards_for_Inv_on_daily_basis = 0.0
+			//fmt.Printf("FMP_INFO.Total_Fil_rewards_for_Inv_on_daily_basis  %f\n", FMP_INFO.Total_Fil_rewards_for_Inv_on_daily_basis)
 
-				FMP_INFO.Cumulative_TwentyFive_percent_Reward_plus_1_180_locked_Reward = Prev_day_Cumulative_TwentyFive_percent_Reward_plus_1_180_locked_Reward + float32(1.0/180.0)*Prev_day_Cumulative_SeventyFive_percent_Locked_Reward_minus_1_180_locked_Reward
+			FMP_INFO.Daily_twenty_five_percent_Reward_for_KSL_P1 = 0
+			//fmt.Printf("FMP_INFO.Daily_twenty_five_percent_Reward_for_KSL_P1 %f\n", FMP_INFO.Daily_twenty_five_percent_Reward_for_KSL_P1)
+			FMP_INFO.Daily_seventy_five_percent_Reward_for_KSL_P1 = 0
+			//fmt.Printf("FMP_INFO.Daily_seventy_five_percent_Reward_for_KSL_P1 %f\n", FMP_INFO.Daily_seventy_five_percent_Reward_for_KSL_P1)
 
-				FMP_INFO.Daily_TwentyFive_percent_Reward_for_inv = 0.0
-
-				FMP_INFO.Cumulative_TwentyFive_percent_Reward_for_Inv = Prev_day_Cumulative_twentyFive_percent_Reward_for_inv
-
-				FMP_INFO.Daily_Seventy_five_percent_locked_reward_for_inv = 0.0
-
-				FMP_INFO.Cumulative_Seventy_five_percent_locked_reward_for_inv = Prev_day_Cumulative_Seventy_five_percent_locked_reward_for_inv * float32(1.0-1.0/180.0)
-
-				FMP_INFO.Daily_Release_of_1__180_of_locked_Reward_for_inv = float32(1.0/180.0) * Prev_day_Cumulative_Seventy_five_percent_locked_reward_for_inv
-
-				FMP_INFO.Cumulative_Release_of_1__180_of_locked_Reward_for_inv = Prev_day_Cumulative_Release_of_1__180_of_locked_Reward_for_inv + FMP_INFO.Daily_Release_of_1__180_of_locked_Reward_for_inv
-
+			if prev_fmp_info.FRP_Adj_Power_for_inv < 1500.0 {
 				FMP_INFO.Daily_Staking_of_inv = FMP_INFO.Daily_Release_of_1__180_of_locked_Reward_for_inv
-
+				//fmt.Printf("FMP_INFO.Daily_Staking_of_inv %f\n", FMP_INFO.Daily_Staking_of_inv)
 				FMP_INFO.Cumulative_Total_staking_of_inv = Prev_day_Cumulative_Total_staking_of_inv + FMP_INFO.Daily_Staking_of_inv
+				//fmt.Printf("FMP_INFO.Cumulative_Total_staking_of_inv %f\n", FMP_INFO.Cumulative_Total_staking_of_inv)
+				FMP_INFO.Daily_Fil_paid_to_inv = 0
+				//fmt.Printf("FMP_INFO.Daily_Fil_paid_to_inv %f\n", FMP_INFO.Daily_Fil_paid_to_inv)
+				FMP_INFO.Cumulative_Daily_Fil_paid_to_inv = 0
+				//fmt.Printf("FMP_INFO.Cumulative_Daily_Fil_paid_to_inv %f\n", FMP_INFO.Cumulative_Daily_Fil_paid_to_inv)
+				FMP_INFO.Value_of_FIL_Paid_to_inv = 0
+				//fmt.Printf("FMP_INFO.Value_of_FIL_Paid_to_inv %f\n", FMP_INFO.Value_of_FIL_Paid_to_inv)
+				FMP_INFO.Value_of_Total_fil_paid_to_inv = 0
+				//fmt.Printf("FMP_INFO.Value_of_Total_fil_paid_to_inv %f\n", FMP_INFO.Value_of_Total_fil_paid_to_inv)
+				FMP_INFO.Graduation_messages_for_inv = "YOU  ARE  STILL YET TO GRADAUTE"
+			} else {
+				FMP_INFO.Daily_Staking_of_inv = 0
+				//fmt.Printf("FMP_INFO.Daily_Staking_of_inv %f\n", FMP_INFO.Daily_Staking_of_inv)
+				FMP_INFO.Cumulative_Total_staking_of_inv = Prev_day_Cumulative_Total_staking_of_inv
+				//fmt.Printf("FMP_INFO.Cumulative_Total_staking_of_inv %f\n", FMP_INFO.Cumulative_Total_staking_of_inv)
+				FMP_INFO.Daily_Fil_paid_to_inv = FMP_INFO.Daily_TwentyFive_percent_Reward_for_inv + FMP_INFO.Daily_Release_of_1__180_of_locked_Reward_for_inv
+				//fmt.Printf("FMP_INFO.Daily_Fil_paid_to_inv %f\n", FMP_INFO.Daily_Fil_paid_to_inv)
+				FMP_INFO.Cumulative_Daily_Fil_paid_to_inv = Prev_day_Cumulative_Daily_Fil_paid_to_inv + FMP_INFO.Daily_Fil_paid_to_inv
+				//fmt.Printf("FMP_INFO.Cumulative_Daily_Fil_paid_to_inv %f\n", FMP_INFO.Cumulative_Daily_Fil_paid_to_inv)
+				FMP_INFO.Value_of_FIL_Paid_to_inv = FMP_INFO.Daily_Fil_paid_to_inv * fil_price
+				//fmt.Printf("FMP_INFO.Value_of_FIL_Paid_to_inv %f\n", FMP_INFO.Value_of_FIL_Paid_to_inv)
+				FMP_INFO.Value_of_Total_fil_paid_to_inv = Prev_day_Value_of_Total_fil_paid_to_inv + FMP_INFO.Value_of_FIL_Paid_to_inv
+				//fmt.Printf("FMP_INFO.Value_of_Total_fil_paid_to_inv %f\n", FMP_INFO.Value_of_Total_fil_paid_to_inv)
+				FMP_INFO.Graduation_messages_for_inv = "YOU ARE GRADUATED"
+			}
 
-				FMP_INFO.Total_Fil_rewards_for_Inv_on_daily_basis = 0.0
+			FMP_INFO.Cumulative_TwentyFive_percent_Reward_for_KSL_P1 = Prev_day_Cumulative_TwentyFive_percent_Reward_for_KSL_P1
+			//fmt.Printf("Prev_day_Cumulative_TwentyFive_percent_Reward_for_KSL_P1 %f\n", Prev_day_Cumulative_TwentyFive_percent_Reward_for_KSL_P1)
 
-				if Date < "2023-2-26" {
-					FMP_INFO.Daily_twenty_five_percent_Reward_for_KSL_P1 = 0.0
-					FMP_INFO.Daily_seventy_five_percent_Reward_for_KSL_P1 = 0.0
-					FMP_INFO.Cumulative_TwentyFive_percent_Reward_for_KSL_P1 = 0.0
-					FMP_INFO.Cumulative_Seventy_five_percent_Reward_for_KSL_P1 = 0.0
-					FMP_INFO.Daily_One_Eighty_Release_for_KSL_P1 = 0.0
-					FMP_INFO.Cumulative_of_Daily_One_Eighty_Release_for_KSL_P1 = 0.0
-					FMP_INFO.Fil_when_deal_is_over_KSL_p1 = 0.0
-					FMP_INFO.Vogo_75_percent_Reward = FMP_INFO.Cumulative_SeventyFive_percent_Locked_Reward_minus_1_180_locke - FMP_INFO.Cumulative_Seventy_five_percent_locked_reward_for_inv
-					FMP_INFO.Vogo_25_percent_Reward = FMP_INFO.Cumulative_TwentyFive_percent_Reward_plus_1_180_locked_Reward - FMP_INFO.Cumulative_TwentyFive_percent_Reward_for_Inv - FMP_INFO.Cumulative_Release_of_1__180_of_locked_Reward_for_inv
-				} else {
-					FMP_INFO.Daily_twenty_five_percent_Reward_for_KSL_P1 = 0.0
-					FMP_INFO.Daily_seventy_five_percent_Reward_for_KSL_P1 = 0.0
-					FMP_INFO.Cumulative_TwentyFive_percent_Reward_for_KSL_P1 = Prev_day_Cumulative_TwentyFive_percent_Reward_for_KSL_P1
-					FMP_INFO.Cumulative_Seventy_five_percent_Reward_for_KSL_P1 = float32(1.0-1.0/180.0) * Prev_day_Cumulative_Seventy_five_percent_Reward_for_KSL_P1
-					FMP_INFO.Daily_One_Eighty_Release_for_KSL_P1 = float32(1.0/180.0) * Prev_day_Cumulative_Seventy_five_percent_Reward_for_KSL_P1
-					FMP_INFO.Cumulative_of_Daily_One_Eighty_Release_for_KSL_P1 = Prev_day_Cumulative_of_Daily_One_Eighty_Release_for_KSL_P1 + FMP_INFO.Daily_One_Eighty_Release_for_KSL_P1
-					FMP_INFO.Fil_when_deal_is_over_KSL_p1 = float32(10000.0-float32(10000.0/350.0)*float32(50.0)) + FMP_INFO.Cumulative_TwentyFive_percent_Reward_for_KSL_P1 + FMP_INFO.Cumulative_Seventy_five_percent_Reward_for_KSL_P1 +
-						FMP_INFO.Cumulative_of_Daily_One_Eighty_Release_for_KSL_P1
-					FMP_INFO.Value_of_Seventy_Five_percent__locked_Reward_for_KSL_P1 = FMP_INFO.Cumulative_Seventy_five_percent_Reward_for_KSL_P1 * fil_price
-					FMP_INFO.Vogo_75_percent_Reward = FMP_INFO.Cumulative_SeventyFive_percent_Locked_Reward_minus_1_180_locke - FMP_INFO.Cumulative_Seventy_five_percent_locked_reward_for_inv - FMP_INFO.Cumulative_Seventy_five_percent_Reward_for_KSL_P1
-					FMP_INFO.Vogo_25_percent_Reward = FMP_INFO.Cumulative_TwentyFive_percent_Reward_plus_1_180_locked_Reward - FMP_INFO.Cumulative_TwentyFive_percent_Reward_for_Inv - FMP_INFO.Cumulative_Release_of_1__180_of_locked_Reward_for_inv - FMP_INFO.Cumulative_TwentyFive_percent_Reward_for_KSL_P1
-				}
-				FMP_INFO.Frp_Cumulative_Fil_Sum_for_Inv = Prev_day_Frp_Cumulative_Fil_Sum_for_Inv
-				if FMP_INFO.Date == "2022-12-26" || FMP_INFO.Date == "2023-01-26" || FMP_INFO.Date == "2023-02-26" || FMP_INFO.Date == "2023-03-26" || FMP_INFO.Date == "2023-04-26" || FMP_INFO.Date == "2023-05-26" || FMP_INFO.Date == "2023-06-26" || FMP_INFO.Date == "2023-07-26" || FMP_INFO.Date == "2023-08-26" {
-					FMP_INFO.FRP_Adj_Power_for_inv = Prev_day_FRP_Adj_Power_for_inv + Prev_day_Cumulative_Total_staking_of_inv/(float32(Current_Sector_Initial_Pledge_32GB)*float32(32.0))
+			FMP_INFO.Cumulative_Seventy_five_percent_Reward_for_KSL_P1 = (float32(1.0) - float32(1.0/180.0)) * Prev_day_Cumulative_Seventy_five_percent_Reward_for_KSL_P1
 
-					// Reward payment part of the KSL_P10000
-					FMP_INFO.Twenty_five_percent_reward_paid_for_KSL_P1 = FMP_INFO.Cumulative_twenty_five_percent_reward_paid_for_KSL_P1
-					FMP_INFO.Cumulative_twenty_five_percent_reward_paid_for_KSL_P1 = Prev_day_Cumulative_twenty_five_percent_reward_paid_for_KSL_P1 + FMP_INFO.Twenty_five_percent_reward_paid_for_KSL_P1
+			FMP_INFO.Daily_One_Eighty_Release_for_KSL_P1 = float32(1.0/180.0) * Prev_day_Cumulative_Seventy_five_percent_Reward_for_KSL_P1
 
-					FMP_INFO.One_eighty_reward_paid_for_KSL_P1 = FMP_INFO.Cumulative_of_Daily_One_Eighty_Release_for_KSL_P1
-					FMP_INFO.Cumulative_One_eighty_reward_paid_for_KSL_P1 = FMP_INFO.One_eighty_reward_paid_for_KSL_P1 + Prev_day_Cumulative_One_eighty_reward_paid_for_KSL_P1
+			FMP_INFO.Total_FIl_Reward_KSL_P1_on_Daily_basis = 0.0
+			//fmt.Printf("FMP_INFO.Total_FIl_Reward_KSL_P1_on_Daily_basis %f\n", FMP_INFO.Total_FIl_Reward_KSL_P1_on_Daily_basis)
 
-				} else {
-					FMP_INFO.FRP_Adj_Power_for_inv = Prev_day_FRP_Adj_Power_for_inv
+			//fmt.Printf("Prev_day_Cumulative_Total_FIl_Reward_KSL_P1 %f\n", Prev_day_Cumulative_Total_FIl_Reward_KSL_P1)
+			FMP_INFO.Cumulative_Total_Fil_Reward_KSL_P1 = Prev_day_Cumulative_Total_FIl_Reward_KSL_P1 + FMP_INFO.Total_FIl_Reward_KSL_P1_on_Daily_basis
+			//fmt.Printf("Cumulative_Total_Fil_Reward_KSL_P1  %f\n", FMP_INFO.Cumulative_Total_Fil_Reward_KSL_P1)
 
-					// Reward payment part of the KSL_P10000
-					FMP_INFO.Twenty_five_percent_reward_paid_for_KSL_P1 = 0
-					FMP_INFO.Cumulative_twenty_five_percent_reward_paid_for_KSL_P1 = Prev_day_Cumulative_twenty_five_percent_reward_paid_for_KSL_P1 + FMP_INFO.Twenty_five_percent_reward_paid_for_KSL_P1
+			FMP_INFO.Cumulative_of_Daily_One_Eighty_Release_for_KSL_P1 = Prev_day_Cumulative_of_Daily_One_Eighty_Release_for_KSL_P1 + FMP_INFO.Daily_One_Eighty_Release_for_KSL_P1
 
-					FMP_INFO.One_eighty_reward_paid_for_KSL_P1 = 0
-					FMP_INFO.Cumulative_One_eighty_reward_paid_for_KSL_P1 = FMP_INFO.One_eighty_reward_paid_for_KSL_P1 + Prev_day_Cumulative_One_eighty_reward_paid_for_KSL_P1
+			FMP_INFO.Fil_when_deal_is_over_KSL_p1 = float32(10000.0-float32(10000.0/350.0)*float32(50.0)) + FMP_INFO.Cumulative_TwentyFive_percent_Reward_for_KSL_P1 + FMP_INFO.Cumulative_Seventy_five_percent_Reward_for_KSL_P1 +
+				FMP_INFO.Cumulative_of_Daily_One_Eighty_Release_for_KSL_P1
+			FMP_INFO.Value_of_Seventy_Five_percent__locked_Reward_for_KSL_P1 = FMP_INFO.Cumulative_Seventy_five_percent_Reward_for_KSL_P1 * fil_price
 
-				}
+			FMP_INFO.Vogo_75_percent_Reward = FMP_INFO.Cumulative_SeventyFive_percent_Locked_Reward_minus_1_180_locke - FMP_INFO.Cumulative_Seventy_five_percent_locked_reward_for_inv - FMP_INFO.Cumulative_Seventy_five_percent_Reward_for_KSL_P1
+			FMP_INFO.Vogo_25_percent_Reward = FMP_INFO.Cumulative_TwentyFive_percent_Reward_plus_1_180_locked_Reward - FMP_INFO.Cumulative_TwentyFive_percent_Reward_for_Inv - FMP_INFO.Cumulative_Release_of_1__180_of_locked_Reward_for_inv - FMP_INFO.Cumulative_TwentyFive_percent_Reward_for_KSL_P1
+
+			FMP_INFO.Frp_Cumulative_Fil_Sum_for_Inv = Prev_day_Frp_Cumulative_Fil_Sum_for_Inv
+
+			if FMP_INFO.Date == "2022-12-26" || FMP_INFO.Date == "2023-01-26" || FMP_INFO.Date == "2023-02-26" || FMP_INFO.Date == "2023-03-26" || FMP_INFO.Date == "2023-04-26" || FMP_INFO.Date == "2023-05-26" || FMP_INFO.Date == "2023-06-26" || FMP_INFO.Date == "2023-07-26" || FMP_INFO.Date == "2023-08-26" {
+				FMP_INFO.FRP_Adj_Power_for_inv = float32(500) + Prev_day_Cumulative_Total_staking_of_inv/(float32(Current_Sector_Initial_Pledge_32GB)*float32(32.0))
+
+				// Reward payment part of the KSL_P10000
+				FMP_INFO.Twenty_five_percent_reward_paid_for_KSL_P1 = FMP_INFO.Cumulative_TwentyFive_percent_Reward_for_KSL_P1 - Prev_day_Cumulative_twenty_five_percent_reward_paid_for_KSL_P1
+				FMP_INFO.Cumulative_twenty_five_percent_reward_paid_for_KSL_P1 = Prev_day_Cumulative_twenty_five_percent_reward_paid_for_KSL_P1 + FMP_INFO.Twenty_five_percent_reward_paid_for_KSL_P1
+
+				FMP_INFO.One_eighty_reward_paid_for_KSL_P1 = FMP_INFO.Cumulative_of_Daily_One_Eighty_Release_for_KSL_P1 - Prev_day_Cumulative_One_eighty_reward_paid_for_KSL_P1
+				FMP_INFO.Cumulative_One_eighty_reward_paid_for_KSL_P1 = FMP_INFO.One_eighty_reward_paid_for_KSL_P1 + Prev_day_Cumulative_One_eighty_reward_paid_for_KSL_P1
 
 			} else {
-				FMP_INFO.Fil_rewards_Daily_basis = Total_FiL_Reward_Vogo
-				FMP_INFO.Total_Quality_adjP_For_Vogo_Daily_Basis = Total_Quality_adjP_For_Vogo_Daily_Basis
-				FMP_INFO.Cumulative_fil_Reward = Prev_day_Cumulative_fil_Reward + FMP_INFO.Fil_rewards_Daily_basis
-				FMP_INFO.Daily_TwentyFive_percent_Reward = float32(25.0/100.0) * Total_FiL_Reward_Vogo
-				FMP_INFO.Daily_SeventyFive_percent_Locked_Reward = float32(75.0/100.0) * Total_FiL_Reward_Vogo
-				FMP_INFO.Cumulative_SeventyFive_percent_Locked_Reward_minus_1_180_locke = FMP_INFO.Daily_SeventyFive_percent_Locked_Reward + (Prev_day_Cumulative_SeventyFive_percent_Locked_Reward_minus_1_180_locked_Reward)*float32(1.0-float32(1.0/180))
-				FMP_INFO.Cumulative_TwentyFive_percent_Reward_plus_1_180_locked_Reward = FMP_INFO.Daily_TwentyFive_percent_Reward + Prev_day_Cumulative_TwentyFive_percent_Reward_plus_1_180_locked_Reward + ((Prev_day_Cumulative_SeventyFive_percent_Locked_Reward_minus_1_180_locked_Reward) * float32(1.0/180))
-				FMP_INFO.Daily_TwentyFive_percent_Reward_for_inv = (Total_Quality_adjP_on_daily_basis_for_Inv / Total_Quality_adjP_For_Vogo_Daily_Basis) * FMP_INFO.Daily_TwentyFive_percent_Reward
-				FMP_INFO.Cumulative_TwentyFive_percent_Reward_for_Inv = Prev_day_Cumulative_twentyFive_percent_Reward_for_inv + FMP_INFO.Daily_TwentyFive_percent_Reward_for_inv
-				FMP_INFO.Daily_Seventy_five_percent_locked_reward_for_inv = (Total_Quality_adjP_on_daily_basis_for_Inv / Total_Quality_adjP_For_Vogo_Daily_Basis) * FMP_INFO.Daily_SeventyFive_percent_Locked_Reward
+				FMP_INFO.FRP_Adj_Power_for_inv = Prev_day_FRP_Adj_Power_for_inv
+				// Reward payment part of the KSL_P10000
+				FMP_INFO.Twenty_five_percent_reward_paid_for_KSL_P1 = 0
+				FMP_INFO.Cumulative_twenty_five_percent_reward_paid_for_KSL_P1 = Prev_day_Cumulative_twenty_five_percent_reward_paid_for_KSL_P1 + FMP_INFO.Twenty_five_percent_reward_paid_for_KSL_P1
 
-				FMP_INFO.Cumulative_Seventy_five_percent_locked_reward_for_inv = FMP_INFO.Daily_Seventy_five_percent_locked_reward_for_inv + float32(1.0-1.0/180)*Prev_day_Cumulative_Seventy_five_percent_locked_reward_for_inv
-				FMP_INFO.Daily_Release_of_1__180_of_locked_Reward_for_inv = (float32(1.0 / 180.0)) * Prev_day_Cumulative_Seventy_five_percent_locked_reward_for_inv
-				FMP_INFO.Cumulative_Release_of_1__180_of_locked_Reward_for_inv = Prev_day_Cumulative_Release_of_1__180_of_locked_Reward_for_inv + FMP_INFO.Daily_Release_of_1__180_of_locked_Reward_for_inv
+				FMP_INFO.One_eighty_reward_paid_for_KSL_P1 = 0
+				FMP_INFO.Cumulative_One_eighty_reward_paid_for_KSL_P1 = FMP_INFO.One_eighty_reward_paid_for_KSL_P1 + Prev_day_Cumulative_One_eighty_reward_paid_for_KSL_P1
+			}
+			FMP_INFO.Cumulative_Reward_paid_KSL_P1 = FMP_INFO.Twenty_five_percent_reward_paid_for_KSL_P1 + FMP_INFO.Cumulative_One_eighty_reward_paid_for_KSL_P1
+			FMP_INFO.Pledge_investement_Present_value_KSL_p1 = (FMP_INFO.Cumulative_Total_Fil_Reward_KSL_P1 - FMP_INFO.Cumulative_Reward_paid_KSL_P1) * fil_price
+			fmt.Printf("FMP_INFO.Pledge_investement_Present_value_KSL_p1 %f\n", FMP_INFO.Pledge_investement_Present_value_KSL_p1)
 
+		} else {
+			FMP_INFO.Fil_rewards_Daily_basis = Total_FiL_Reward_Vogo
+			FMP_INFO.Total_Quality_adjP_For_Vogo_Daily_Basis = Total_Quality_adjP_For_Vogo_Daily_Basis
+			FMP_INFO.Cumulative_fil_Reward = Prev_day_Cumulative_fil_Reward + FMP_INFO.Fil_rewards_Daily_basis
+			FMP_INFO.Daily_TwentyFive_percent_Reward = float32(25.0/100.0) * Total_FiL_Reward_Vogo
+			FMP_INFO.Daily_SeventyFive_percent_Locked_Reward = float32(75.0/100.0) * Total_FiL_Reward_Vogo
+			FMP_INFO.Cumulative_SeventyFive_percent_Locked_Reward_minus_1_180_locke = FMP_INFO.Daily_SeventyFive_percent_Locked_Reward + (Prev_day_Cumulative_SeventyFive_percent_Locked_Reward_minus_1_180_locked_Reward)*float32(1.0-float32(1.0/180))
+			FMP_INFO.Cumulative_TwentyFive_percent_Reward_plus_1_180_locked_Reward = FMP_INFO.Daily_TwentyFive_percent_Reward + Prev_day_Cumulative_TwentyFive_percent_Reward_plus_1_180_locked_Reward + ((Prev_day_Cumulative_SeventyFive_percent_Locked_Reward_minus_1_180_locked_Reward) * float32(1.0/180))
+			FMP_INFO.Daily_TwentyFive_percent_Reward_for_inv = (Total_Quality_adjP_on_daily_basis_for_Inv / Total_Quality_adjP_For_Vogo_Daily_Basis) * FMP_INFO.Daily_TwentyFive_percent_Reward
+			FMP_INFO.Cumulative_TwentyFive_percent_Reward_for_Inv = Prev_day_Cumulative_twentyFive_percent_Reward_for_inv + FMP_INFO.Daily_TwentyFive_percent_Reward_for_inv
+			FMP_INFO.Daily_Seventy_five_percent_locked_reward_for_inv = (Total_Quality_adjP_on_daily_basis_for_Inv / Total_Quality_adjP_For_Vogo_Daily_Basis) * FMP_INFO.Daily_SeventyFive_percent_Locked_Reward
+
+			FMP_INFO.Cumulative_Seventy_five_percent_locked_reward_for_inv = FMP_INFO.Daily_Seventy_five_percent_locked_reward_for_inv + float32(1.0-1.0/180)*Prev_day_Cumulative_Seventy_five_percent_locked_reward_for_inv
+			FMP_INFO.Daily_Release_of_1__180_of_locked_Reward_for_inv = (float32(1.0 / 180.0)) * Prev_day_Cumulative_Seventy_five_percent_locked_reward_for_inv
+			FMP_INFO.Cumulative_Release_of_1__180_of_locked_Reward_for_inv = Prev_day_Cumulative_Release_of_1__180_of_locked_Reward_for_inv + FMP_INFO.Daily_Release_of_1__180_of_locked_Reward_for_inv
+
+			if prev_fmp_info.FRP_Adj_Power_for_inv < 1500.0 {
 				FMP_INFO.Daily_Staking_of_inv = FMP_INFO.Daily_TwentyFive_percent_Reward_for_inv + FMP_INFO.Daily_Release_of_1__180_of_locked_Reward_for_inv
 				FMP_INFO.Cumulative_Total_staking_of_inv = Prev_day_Cumulative_Total_staking_of_inv + FMP_INFO.Daily_Staking_of_inv
-				FMP_INFO.Total_Fil_rewards_for_Inv_on_daily_basis = FMP_INFO.Daily_TwentyFive_percent_Reward_for_inv + FMP_INFO.Daily_Seventy_five_percent_locked_reward_for_inv
-				FMP_INFO.Frp_Cumulative_Fil_Sum_for_Inv = Prev_day_Frp_Cumulative_Fil_Sum_for_Inv + FMP_INFO.Total_Fil_rewards_for_Inv_on_daily_basis
+				FMP_INFO.Daily_Fil_paid_to_inv = 0
+				FMP_INFO.Cumulative_Daily_Fil_paid_to_inv = 0
+				FMP_INFO.Value_of_FIL_Paid_to_inv = 0
+				FMP_INFO.Value_of_Total_fil_paid_to_inv = 0
+				FMP_INFO.Graduation_messages_for_inv = "YOU  ARE  STILL YET TO GRADAUTE"
+			} else {
+				FMP_INFO.Daily_Staking_of_inv = 0
+				FMP_INFO.Cumulative_Total_staking_of_inv = Prev_day_Cumulative_Total_staking_of_inv
+				FMP_INFO.Daily_Fil_paid_to_inv = FMP_INFO.Daily_TwentyFive_percent_Reward_for_inv + FMP_INFO.Daily_Release_of_1__180_of_locked_Reward_for_inv
+				FMP_INFO.Cumulative_Daily_Fil_paid_to_inv = Prev_day_Cumulative_Daily_Fil_paid_to_inv + FMP_INFO.Daily_Fil_paid_to_inv
+				FMP_INFO.Value_of_FIL_Paid_to_inv = FMP_INFO.Daily_Fil_paid_to_inv * fil_price
+				FMP_INFO.Value_of_Total_fil_paid_to_inv = Prev_day_Value_of_Total_fil_paid_to_inv + FMP_INFO.Value_of_FIL_Paid_to_inv
+				FMP_INFO.Graduation_messages_for_inv = "YOU ARE GRADUATED"
+			}
 
-				if Date < "2023-2-26" {
-					FMP_INFO.Daily_twenty_five_percent_Reward_for_KSL_P1 = 0
-					FMP_INFO.Daily_seventy_five_percent_Reward_for_KSL_P1 = 0
-					FMP_INFO.Cumulative_TwentyFive_percent_Reward_for_KSL_P1 = 0
-					FMP_INFO.Cumulative_Seventy_five_percent_Reward_for_KSL_P1 = 0
-					FMP_INFO.Daily_One_Eighty_Release_for_KSL_P1 = 0
-					FMP_INFO.Cumulative_of_Daily_One_Eighty_Release_for_KSL_P1 = 0
-					FMP_INFO.Value_of_Seventy_Five_percent__locked_Reward_for_KSL_P1 = 0
-					FMP_INFO.Fil_when_deal_is_over_KSL_p1 = 0
-					FMP_INFO.Vogo_75_percent_Reward = FMP_INFO.Cumulative_SeventyFive_percent_Locked_Reward_minus_1_180_locke - FMP_INFO.Cumulative_Seventy_five_percent_locked_reward_for_inv
-					FMP_INFO.Vogo_25_percent_Reward = FMP_INFO.Cumulative_TwentyFive_percent_Reward_plus_1_180_locked_Reward - FMP_INFO.Cumulative_TwentyFive_percent_Reward_for_Inv - FMP_INFO.Cumulative_Release_of_1__180_of_locked_Reward_for_inv
-				} else {
+			FMP_INFO.Frp_Cumulative_Fil_Sum_for_Inv = Prev_day_Frp_Cumulative_Fil_Sum_for_Inv + FMP_INFO.Total_Fil_rewards_for_Inv_on_daily_basis
 
-					FMP_INFO.Daily_twenty_five_percent_Reward_for_KSL_P1 = float32(0.3) * FMP_INFO.Daily_TwentyFive_percent_Reward_for_inv * (float32(1143) / float32(Total_Quality_adjP_on_daily_basis_for_Vogo))
+			FMP_INFO.Daily_twenty_five_percent_Reward_for_KSL_P1 = (float32(0.3) * FMP_INFO.Daily_TwentyFive_percent_Reward) * (float32(1143.0) / float32(Total_Quality_adjP_For_Vogo_Daily_Basis))
+			//fmt.Printf("FMP_INFO.Daily_twenty_five_percent_Reward_for_KSL_P1 %f\n", FMP_INFO.Daily_twenty_five_percent_Reward_for_KSL_P1)
 
-					FMP_INFO.Daily_seventy_five_percent_Reward_for_KSL_P1 = float32(0.3) * FMP_INFO.Daily_SeventyFive_percent_Locked_Reward * (float32(1143) / float32(Total_Quality_adjP_on_daily_basis_for_Vogo))
+			FMP_INFO.Daily_seventy_five_percent_Reward_for_KSL_P1 = float32(0.3) * FMP_INFO.Daily_SeventyFive_percent_Locked_Reward * (float32(1143) / float32(Total_Quality_adjP_For_Vogo_Daily_Basis))
+			//fmt.Printf("FMP_INFO.Daily_seventy_five_percent_Reward_for_KSL_P1 %f\n", FMP_INFO.Daily_seventy_five_percent_Reward_for_KSL_P1)
 
-					FMP_INFO.Cumulative_TwentyFive_percent_Reward_for_KSL_P1 = Prev_day_Cumulative_TwentyFive_percent_Reward_for_KSL_P1 + FMP_INFO.Daily_twenty_five_percent_Reward_for_KSL_P1
+			FMP_INFO.Cumulative_TwentyFive_percent_Reward_for_KSL_P1 = Prev_day_Cumulative_TwentyFive_percent_Reward_for_KSL_P1 + FMP_INFO.Daily_twenty_five_percent_Reward_for_KSL_P1
+			//fmt.Printf("FMP_INFO.Cumulative_TwentyFive_percent_Reward_for_KSL_P1 %f\n", FMP_INFO.Cumulative_TwentyFive_percent_Reward_for_KSL_P1)
 
-					FMP_INFO.Cumulative_Seventy_five_percent_Reward_for_KSL_P1 = FMP_INFO.Daily_seventy_five_percent_Reward_for_KSL_P1 + float32(1.0-1.0/180.0)*Prev_day_Cumulative_Seventy_five_percent_Reward_for_KSL_P1
+			FMP_INFO.Cumulative_Seventy_five_percent_Reward_for_KSL_P1 = FMP_INFO.Daily_seventy_five_percent_Reward_for_KSL_P1 + float32(1.0-float32(1.0/180.0))*Prev_day_Cumulative_Seventy_five_percent_Reward_for_KSL_P1
+			//fmt.Printf("Prev_day_Cumulative_Seventy_five_percent_Reward_for_KSL_P1 %f\n", Prev_day_Cumulative_Seventy_five_percent_Reward_for_KSL_P1)
 
-					FMP_INFO.Daily_One_Eighty_Release_for_KSL_P1 = (float32(1.0 / 180.0)) * Prev_day_Cumulative_Seventy_five_percent_Reward_for_KSL_P1
+			FMP_INFO.Daily_One_Eighty_Release_for_KSL_P1 = (float32(1.0 / 180.0)) * Prev_day_Cumulative_Seventy_five_percent_Reward_for_KSL_P1
+			//fmt.Printf("FMP_INFO.Daily_One_Eighty_Release_for_KSL_P1 %f\n", FMP_INFO.Daily_One_Eighty_Release_for_KSL_P1)
 
-					FMP_INFO.Cumulative_of_Daily_One_Eighty_Release_for_KSL_P1 = Prev_day_Cumulative_of_Daily_One_Eighty_Release_for_KSL_P1 + FMP_INFO.Daily_One_Eighty_Release_for_KSL_P1
+			FMP_INFO.Cumulative_of_Daily_One_Eighty_Release_for_KSL_P1 = Prev_day_Cumulative_of_Daily_One_Eighty_Release_for_KSL_P1 + FMP_INFO.Daily_One_Eighty_Release_for_KSL_P1
+			//fmt.Printf("FMP_INFO.Cumulative_of_Daily_One_Eighty_Release_for_KSL_P1 %f\n", FMP_INFO.Cumulative_of_Daily_One_Eighty_Release_for_KSL_P1)
 
-					FMP_INFO.Value_of_Seventy_Five_percent__locked_Reward_for_KSL_P1 = FMP_INFO.Cumulative_Seventy_five_percent_Reward_for_KSL_P1 * fil_price
+			FMP_INFO.Value_of_Seventy_Five_percent__locked_Reward_for_KSL_P1 = FMP_INFO.Cumulative_Seventy_five_percent_Reward_for_KSL_P1 * fil_price
+			//fmt.Printf("FMP_INFO.Value_of_Seventy_Five_percent__locked_Reward_for_KSL_P1 %f\n", FMP_INFO.Value_of_Seventy_Five_percent__locked_Reward_for_KSL_P1)
 
-					FMP_INFO.Total_FIl_Reward_KSL_P1_on_Daily_basis = FMP_INFO.Daily_One_Eighty_Release_for_KSL_P1 + FMP_INFO.Daily_twenty_five_percent_Reward_for_KSL_P1 + FMP_INFO.Daily_seventy_five_percent_Reward_for_KSL_P1
+			FMP_INFO.Total_FIl_Reward_KSL_P1_on_Daily_basis = FMP_INFO.Daily_twenty_five_percent_Reward_for_KSL_P1 + FMP_INFO.Daily_seventy_five_percent_Reward_for_KSL_P1
+			//fmt.Printf("FMP_INFO.Total_FIl_Reward_KSL_P1_on_Daily_basis %f\n", FMP_INFO.Total_FIl_Reward_KSL_P1_on_Daily_basis)
 
-					FMP_INFO.Cumulative_Total_Fil_Reward_KSL_P1 = Prev_day_Cumulative_Total_FIl_Reward_KSL_P1 + FMP_INFO.Total_FIl_Reward_KSL_P1_on_Daily_basis
+			FMP_INFO.Cumulative_Total_Fil_Reward_KSL_P1 = Prev_day_Cumulative_Total_FIl_Reward_KSL_P1 + FMP_INFO.Total_FIl_Reward_KSL_P1_on_Daily_basis
 
-					FMP_INFO.Pledge_investement_Present_value_KSL_p1 = FMP_INFO.Cumulative_Total_Fil_Reward_KSL_P1 * fil_price
+			//fmt.Printf("Cumulative_Total_Fil_Reward_KSL_P1  %f\n", FMP_INFO.Cumulative_Total_Fil_Reward_KSL_P1)
 
-					FMP_INFO.Fil_when_deal_is_over_KSL_p1 = float32(10000.0-(float32(10000.0/350.0)*float32(50.0))) + FMP_INFO.Cumulative_TwentyFive_percent_Reward_for_KSL_P1 + FMP_INFO.Cumulative_Seventy_five_percent_Reward_for_KSL_P1 +
-						FMP_INFO.Cumulative_of_Daily_One_Eighty_Release_for_KSL_P1
+			FMP_INFO.Cumulative_Reward_paid_KSL_P1 = FMP_INFO.Twenty_five_percent_reward_paid_for_KSL_P1 + FMP_INFO.Cumulative_One_eighty_reward_paid_for_KSL_P1
 
-					FMP_INFO.Twenty_five_percent_reward_paid_for_KSL_P1 = 0
-					FMP_INFO.Cumulative_twenty_five_percent_reward_paid_for_KSL_P1 = Prev_day_Cumulative_twenty_five_percent_reward_paid_for_KSL_P1 + FMP_INFO.Twenty_five_percent_reward_paid_for_KSL_P1
+			FMP_INFO.Pledge_investement_Present_value_KSL_p1 = (FMP_INFO.Cumulative_Total_Fil_Reward_KSL_P1 - FMP_INFO.Cumulative_Reward_paid_KSL_P1) * fil_price
+			//fmt.Printf("FMP_INFO.Pledge_investement_Present_value_KSL_p1 %f\n", FMP_INFO.Pledge_investement_Present_value_KSL_p1)
 
-					FMP_INFO.One_eighty_reward_paid_for_KSL_P1 = 0
+			FMP_INFO.Fil_when_deal_is_over_KSL_p1 = (float32(10000.0) - (float32(10000.0/350.0) * float32(50.0))) + FMP_INFO.Cumulative_TwentyFive_percent_Reward_for_KSL_P1 + FMP_INFO.Cumulative_Seventy_five_percent_Reward_for_KSL_P1 +
+				FMP_INFO.Cumulative_of_Daily_One_Eighty_Release_for_KSL_P1
 
-					FMP_INFO.Cumulative_One_eighty_reward_paid_for_KSL_P1 = FMP_INFO.One_eighty_reward_paid_for_KSL_P1 + Prev_day_Cumulative_One_eighty_reward_paid_for_KSL_P1
+			//fmt.Printf("FIL when deal is over %f\n", FMP_INFO.Fil_when_deal_is_over_KSL_p1)
 
-					FMP_INFO.Vogo_75_percent_Reward = FMP_INFO.Cumulative_SeventyFive_percent_Locked_Reward_minus_1_180_locke - FMP_INFO.Cumulative_Seventy_five_percent_locked_reward_for_inv - FMP_INFO.Cumulative_Seventy_five_percent_Reward_for_KSL_P1
+			FMP_INFO.Twenty_five_percent_reward_paid_for_KSL_P1 = 0
+			FMP_INFO.Cumulative_twenty_five_percent_reward_paid_for_KSL_P1 = Prev_day_Cumulative_twenty_five_percent_reward_paid_for_KSL_P1 + FMP_INFO.Twenty_five_percent_reward_paid_for_KSL_P1
+			//fmt.Printf("FMP_INFO.FMP_INFO.Cumulative_twenty_five_percent_reward_paid_for_KSL_P1 %f\n", FMP_INFO.Cumulative_twenty_five_percent_reward_paid_for_KSL_P1)
 
-					FMP_INFO.Vogo_25_percent_Reward = FMP_INFO.Cumulative_TwentyFive_percent_Reward_plus_1_180_locked_Reward - FMP_INFO.Cumulative_TwentyFive_percent_Reward_for_Inv - FMP_INFO.Cumulative_Release_of_1__180_of_locked_Reward_for_inv - FMP_INFO.Cumulative_TwentyFive_percent_Reward_for_KSL_P1
-				}
+			FMP_INFO.One_eighty_reward_paid_for_KSL_P1 = 0
 
-				if FMP_INFO.Date == "2022-12-26" || FMP_INFO.Date == "2023-01-26" || FMP_INFO.Date == "2023-02-26" || FMP_INFO.Date == "2023-03-26" || FMP_INFO.Date == "2023-04-26" || FMP_INFO.Date == "2023-05-26" || FMP_INFO.Date == "2023-06-26" || FMP_INFO.Date == "2023-07-26" || FMP_INFO.Date == "2023-08-26" {
+			FMP_INFO.Cumulative_One_eighty_reward_paid_for_KSL_P1 = FMP_INFO.One_eighty_reward_paid_for_KSL_P1 + Prev_day_Cumulative_One_eighty_reward_paid_for_KSL_P1
 
-					FMP_INFO.FRP_Adj_Power_for_inv = Prev_day_FRP_Adj_Power_for_inv + Prev_day_Cumulative_Total_staking_of_inv/(float32(Current_Sector_Initial_Pledge_32GB)*float32(32.0))
+			FMP_INFO.Vogo_75_percent_Reward = FMP_INFO.Cumulative_SeventyFive_percent_Locked_Reward_minus_1_180_locke - FMP_INFO.Cumulative_Seventy_five_percent_locked_reward_for_inv - FMP_INFO.Cumulative_Seventy_five_percent_Reward_for_KSL_P1
 
-					// Reward payment part of the KSL_P10000
-					FMP_INFO.Twenty_five_percent_reward_paid_for_KSL_P1 = FMP_INFO.Cumulative_TwentyFive_percent_Reward_for_KSL_P1
-					FMP_INFO.Cumulative_twenty_five_percent_reward_paid_for_KSL_P1 = Prev_day_Cumulative_twenty_five_percent_reward_paid_for_KSL_P1 + FMP_INFO.Twenty_five_percent_reward_paid_for_KSL_P1
+			FMP_INFO.Vogo_25_percent_Reward = FMP_INFO.Cumulative_TwentyFive_percent_Reward_plus_1_180_locked_Reward - FMP_INFO.Cumulative_TwentyFive_percent_Reward_for_Inv - FMP_INFO.Cumulative_Release_of_1__180_of_locked_Reward_for_inv - FMP_INFO.Cumulative_TwentyFive_percent_Reward_for_KSL_P1
 
-					FMP_INFO.One_eighty_reward_paid_for_KSL_P1 = FMP_INFO.Cumulative_of_Daily_One_Eighty_Release_for_KSL_P1
+			if FMP_INFO.Date == "2022-12-26" || FMP_INFO.Date == "2023-01-26" || FMP_INFO.Date == "2023-02-26" || FMP_INFO.Date == "2023-03-26" || FMP_INFO.Date == "2023-04-26" || FMP_INFO.Date == "2023-05-26" || FMP_INFO.Date == "2023-06-26" || FMP_INFO.Date == "2023-07-26" || FMP_INFO.Date == "2023-08-26" {
 
-					FMP_INFO.Cumulative_One_eighty_reward_paid_for_KSL_P1 = FMP_INFO.One_eighty_reward_paid_for_KSL_P1 + Prev_day_Cumulative_One_eighty_reward_paid_for_KSL_P1
+				FMP_INFO.FRP_Adj_Power_for_inv = float32(500.0) + Prev_day_Cumulative_Total_staking_of_inv/(float32(Current_Sector_Initial_Pledge_32GB)*float32(32.0))
 
-				} else {
-					FMP_INFO.FRP_Adj_Power_for_inv = Prev_day_FRP_Adj_Power_for_inv
+				// Reward payment part of the KSL_P10000
+				FMP_INFO.Cumulative_twenty_five_percent_reward_paid_for_KSL_P1 = Prev_day_Cumulative_twenty_five_percent_reward_paid_for_KSL_P1 + FMP_INFO.Twenty_five_percent_reward_paid_for_KSL_P1
+				FMP_INFO.Twenty_five_percent_reward_paid_for_KSL_P1 = FMP_INFO.Cumulative_TwentyFive_percent_Reward_for_KSL_P1 - FMP_INFO.Cumulative_twenty_five_percent_reward_paid_for_KSL_P1
 
-					// Reward payment part of the KSL_P10000
-					FMP_INFO.Twenty_five_percent_reward_paid_for_KSL_P1 = 0
-					FMP_INFO.Cumulative_twenty_five_percent_reward_paid_for_KSL_P1 = Prev_day_Cumulative_twenty_five_percent_reward_paid_for_KSL_P1 + FMP_INFO.Twenty_five_percent_reward_paid_for_KSL_P1
+				FMP_INFO.One_eighty_reward_paid_for_KSL_P1 = FMP_INFO.Cumulative_of_Daily_One_Eighty_Release_for_KSL_P1
 
-					FMP_INFO.One_eighty_reward_paid_for_KSL_P1 = 0
+				FMP_INFO.Cumulative_One_eighty_reward_paid_for_KSL_P1 = FMP_INFO.One_eighty_reward_paid_for_KSL_P1 + Prev_day_Cumulative_One_eighty_reward_paid_for_KSL_P1
 
-					FMP_INFO.Cumulative_One_eighty_reward_paid_for_KSL_P1 = FMP_INFO.One_eighty_reward_paid_for_KSL_P1 + Prev_day_Cumulative_One_eighty_reward_paid_for_KSL_P1
-				}
+			} else {
+				FMP_INFO.FRP_Adj_Power_for_inv = Prev_day_FRP_Adj_Power_for_inv
+
+				// Reward payment part of the KSL_P10000
+				FMP_INFO.Twenty_five_percent_reward_paid_for_KSL_P1 = 0
+				FMP_INFO.Cumulative_twenty_five_percent_reward_paid_for_KSL_P1 = Prev_day_Cumulative_twenty_five_percent_reward_paid_for_KSL_P1 + FMP_INFO.Twenty_five_percent_reward_paid_for_KSL_P1
+
+				FMP_INFO.One_eighty_reward_paid_for_KSL_P1 = 0
+
+				FMP_INFO.Cumulative_One_eighty_reward_paid_for_KSL_P1 = FMP_INFO.One_eighty_reward_paid_for_KSL_P1 + Prev_day_Cumulative_One_eighty_reward_paid_for_KSL_P1
 			}
 		}
-		fmt.Println(FMP_INFO)
-		//db.Create(&FMP_INFO)
+
+		/*fmt.Printf("FMP_INFO.Date %s\n", FMP_INFO.Date)
+		frp_data := reflect.TypeOf(FMP_INFO)
+		for i := 0; i < frp_data.NumField(); i++ {
+			fieldvalue := reflect.ValueOf(FMP_INFO).Field(i)
+			fmt.Printf("%s: %v\n", frp_data.Field(i).Name, fieldvalue.Interface())
+		}*/
+		//fmt.Println(FMP_INFO)
+		db.Create(&FMP_INFO)
 	}
+
 }
 
 /*
-
 
 FRP_TABLE_AND_KSL_TABLE for filbytesdev
 
@@ -1052,5 +1114,49 @@ Insert into info_for_ksl_frp_500_and_ksl_100000 (
     '2023/2/26',2295,18.38,4.59, 13.78, 2591.48,   0,         1025.56,   1565.92,      779.07,  1194.60,      1.13,   153.77, 3.38,  369.26,
 	   2.04,   92.04,     3.17,        245.80,    563, 4.51 ,615.06, 0.69,2.06,0.69,2.06,0,0,0,0,0,0,0,'YOUR STILL YET TO GRADAUTE' );
    {2022-11-27 1922   0     0      0     19.51    0.0812778  4.961278 14.548722  3.6701114      10.75989    0       1.27    0    3.7888331 0.021166667 0.021166667 0.021166667 1.2911667 500  0     5.07  0 0 0 0 0 0 0 0 0 0 0 YOU  ARE  STILL YET TO GRADAUTE}
+
+
+insert into  info_for_ksl_frp_500_and_ksl_100000 (date, total_quality_adjp_for_vogo_daily_basis, fil_rewards_daily_basis, daily_twenty_five_percent_reward,daily_seventy_five_percent_locked_reward, cumulative_fil_reward, daily_release_1_180_of_seventy_five_percent_reward, cumulative_twenty_five_percent_reward_plus_1_180_locked_reward, cumulative_seventy_five_percent_locked_reward_minus_1_180_locke, vogo_25_percent_reward, vogo_75_percent_reward, daily_twenty_five_percent_reward_for_inv, cumulative_twenty_five_percent_reward_for_inv, daily_seventy_five_percent_locked_reward_for_inv, cumulative_seventy_five_percent_locked_reward_for_inv, daily_release_of_1__180_of_locked_reward_for_inv, cumulative_release_of_1__180_of_locked_reward_for_inv, daily_staking_of_inv, cumulative_total_staking_of_inv, frp_adj_power_for_inv,
+total_fil_rewards_for_inv_on_daily_basis, frp_cumulative_fil_sum_for_inv,
+daily_twenty_five_percent_reward_for_ksl_p1,
+daily_seventy_five_percent_reward_for_ksl_p1,
+cumulative_twenty_five_percent_reward_for_ksl_p1,
+cumulative_seventy_five_percent_reward_for_ksl_p1,
+daily_one_eighty_release_for_ksl_p1,
+cumulative_of_daily_one_eighty_release_for_ksl_p1,
+value_of_seventy_five_percent__locked_reward_for_ksl_p1,
+total_f_il_reward_ksl_p1_on_daily_basis,
+cumulative_total_fil_reward_ksl_p1,
+pledge_investement_present_value_ksl_p1,
+fil_when_deal_is_over_ksl_p1,
+graduation_messages_for_inv,
+twenty_five_percent_reward_paid_for_ksl_p1,
+cumulative_twenty_five_percent_reward_paid_for_ksl_p1,
+one_eighty_reward_paid_for_ksl_p1,
+cumulative_one_eighty_reward_paid_for_ksl_p1,
+cumulative_reward_paid_ksl_p1,
+value_of_fil_paid_to_ksl_p1,
+cumulative_value_of_fil_paid_to_ksl_p1,
+daily_fil_paid_to_inv,
+ cumulative_daily_fil_paid_to_inv,
+value_of_fil_paid_to_inv,
+value_of_total_fil_paid_to_inv)
+values (‘2023-02-26’, 2295, 18.38, 4.59, 13.78, 2591.48, 5.62, 1025.56, 1565.92,779.07, 1194.60, 1.13,153.77,3.38,369.26, 2.04, 92.04, 3.17, 92.04, 563, 4.51,
+615.06,0.69, 2.06, 0.69, 2.06, 0, 0, 18190, 2.74, 2.74, 24253, 8574, ‘you are not yet graduated’,0, 0, 0, 0, 0, 0,0, 0, 0, 0, 0);
+{2023-02-27 2295 18.1 4.525 13.575001 2609.58 0 1038.7847 1570.7954 789.8132 1200.2567 1.1100545 154.88007 3.3301637 370.53873 2.0514445 94.091446 3.161499 95.2015 0 0 0 0 563 0 615.06 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 YOU  ARE  STILL YET TO GRADAUTE}
+{2023-02-27 2295 18.1 4.525 13.575001 2609.58 0 1038.7847 1570.7954 -Inf -Inf 1.1100545 154.88007 3.3301637 370.53873 2.0514445 94.091446 3.161499 95.2015 0 0 0 0 563 0 615.06
+	+Inf +Inf +Inf +Inf 0.011444445 0.011444445 0 0 0 0 0 0 0 +Inf +Inf +Inf +Inf +Inf YOU  ARE  STILL YET TO GRADAUTE}
+
+	{2023-02-28 2295 0 0 0 2609.58 8.726642 1047.5114 1562.0687 795.11523 1189.5344 0 154.88007 0 368.48016 2.0585485 96.149994 2.0585485 97.26005 0 0 0 0 563 0 615.06 0 0
+		1.3660883 4.054171 0.022649003 0.034093447 0 0 0 0 0 0 0
+		36694.3 0 0 0 8576.883 YOU  ARE  STILL YET TO GRADAUTE}
+
+		{2023-02-28 2295 0 0 0 2609.58 8.726642 1047.5114 1562.0687 795.11523 1189.5344 0 154.88007 0 368.48016 2.0585485 96.149994 2.0585485 97.26005 0 0 0 0 563 0 615.06 0 0
+			1.3660883 4.054171 0.022649003 0.034093447 0 0 0 0 0 0 0 36694.3 0 0 0 8576.883 YOU  ARE  STILL YET TO GRADAUTE}
+
+
+insert into  node_info_daily_adjp_and_f_il_prices (date,fil_price,current_sector_initial_pledge_32_gb, fil_rewards_f01624021_node_1, fil_rewards_f01918123_node_2, fil_rewards_f01987994_node_3,
+	cummulative_fil_rewards_f01624021_node_1, cummulative_fil_rewards_f01918123_node_2, cummulative_fil_rewards_f01987994_node_3,
+	frp_f01624021_node_1_adj_p, frp_f01918123_node_2_adj_p,  frp_f01987994_node_3_adj_p ) values ( '2023-3-24', 7676, 0.2167, 17.24, 0, 0, 4519.22, 1520.09, 0, 1189 ,1122,0 )
 
 */
